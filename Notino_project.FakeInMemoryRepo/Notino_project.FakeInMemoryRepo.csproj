@@ -1,0 +1,14 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Notino_project.Models\Notino_project.Models.csproj" />
+    <ProjectReference Include="..\Notino_project.Repositories.Interfaces\Notino_project.Repositories.Interfaces.csproj" />
+  </ItemGroup>
+
+</Project>

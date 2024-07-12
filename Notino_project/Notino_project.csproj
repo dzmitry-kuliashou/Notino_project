@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MessagePack.AspNetCoreMvcFormatter" Version="2.5.171" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Notino_project.FakeInMemoryRepo\Notino_project.FakeInMemoryRepo.csproj" />
+    <ProjectReference Include="..\Notino_project.Repositories.Interfaces\Notino_project.Repositories.Interfaces.csproj" />
+    <ProjectReference Include="..\Notino_project.Services.Interfaces\Notino_project.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Notino_project.Services\Notino_project.Services.csproj" />
+  </ItemGroup>
+
+</Project>
