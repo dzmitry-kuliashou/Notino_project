@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Notino_project.Dtos.Document;
 using Notino_project.Mappers;
 using Notino_project.Services.Interfaces.Services.Documents;
@@ -44,7 +45,7 @@ namespace Notino_project.Controllers
 
             var created = await _documentsService.Create(document);
 
-            return Ok(created.ToDocumentDto());
+            return CreatedAtAction(nameof(Create), new { id = created.Id }, created.ToDocumentDto());
         }
 
         [HttpPut("{id:Guid}")]
