@@ -1,11 +1,7 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Formatters;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Notino_project.Controllers;
 using Notino_project.Dtos.Document;
-using Notino_project.ModelBinders;
 using Notino_project.Models.Models;
 using Notino_project.Services.Interfaces.Services.Documents;
 using System.Text.Json;
@@ -52,9 +48,12 @@ namespace Notino_project.UnitTests.ControllerTests
                         }
                     }";
 
-            var doc = JsonDocument.Parse(jsonInput);
-            var root = doc.RootElement;
-            var data = root.GetProperty("data");
+            JsonElement data;
+            using (var doc = JsonDocument.Parse(jsonInput))
+            {
+                var root = doc.RootElement;
+                data = root.GetProperty("data").Clone();
+            }
 
             return new Document
             {

@@ -37,9 +37,12 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
                         }
                     }";
 
-            var doc = JsonDocument.Parse(jsonInput);
-            var root = doc.RootElement;
-            var data = root.GetProperty("data");
+            JsonElement data;
+            using (var doc = JsonDocument.Parse(jsonInput))
+            {
+                var root = doc.RootElement;
+                data = root.GetProperty("data").Clone();
+            }
 
             return new Document
             {

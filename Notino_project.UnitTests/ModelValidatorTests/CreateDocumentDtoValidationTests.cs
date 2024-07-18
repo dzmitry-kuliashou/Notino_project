@@ -18,9 +18,7 @@ namespace Notino_project.UnitTests.ModelValidatorTests
                         }
                     }";
 
-            var doc = JsonDocument.Parse(jsonInput);
-            var root = doc.RootElement;
-            var data = root.GetProperty("data");
+            var data = GetDataElement(jsonInput);
 
             var createDocumentModel = new CreateDocumentDto
             {
@@ -46,9 +44,7 @@ namespace Notino_project.UnitTests.ModelValidatorTests
                         }
                     }";
 
-            var doc = JsonDocument.Parse(jsonInput);
-            var root = doc.RootElement;
-            var data = root.GetProperty("data");
+            var data = GetDataElement(jsonInput);
 
             var createDocumentModel = new CreateDocumentDto
             {
@@ -74,9 +70,7 @@ namespace Notino_project.UnitTests.ModelValidatorTests
                         }
                     }";
 
-            var doc = JsonDocument.Parse(jsonInput);
-            var root = doc.RootElement;
-            var data = root.GetProperty("data");
+            var data = GetDataElement(jsonInput);
 
             var createDocumentModel = new CreateDocumentDto
             {
@@ -95,6 +89,18 @@ namespace Notino_project.UnitTests.ModelValidatorTests
             var validationContext = new ValidationContext(model, serviceProvider: null, items: null);
             Validator.TryValidateObject(model, validationContext, validationResults, validateAllProperties: true);
             return validationResults;
+        }
+
+        private JsonElement GetDataElement(string jsonInput)
+        {
+            JsonElement data;
+            using (var doc = JsonDocument.Parse(jsonInput))
+            {
+                var root = doc.RootElement;
+                data = root.GetProperty("data").Clone();
+            }
+
+            return data;
         }
     }
 }
