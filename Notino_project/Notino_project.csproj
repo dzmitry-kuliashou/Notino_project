@@ -15,8 +15,7 @@
   <ItemGroup>
     <ProjectReference Include="..\Notino_project.Contract\Notino_project.Contract.csproj" />
     <ProjectReference Include="..\Notino_project.Core\Notino_project.Core.csproj" />
-    <ProjectReference Include="..\Notino_project.FakeInMemoryRepo\Notino_project.FakeInMemoryRepo.csproj" />
-    <ProjectReference Include="..\Notino_project.Repositories.Interfaces\Notino_project.Repositories.Interfaces.csproj" />
+    <ProjectReference Include="..\Notino_project.Infrastructure.FakeInMemoryStorage\Notino_project.Infrastructure.FakeInMemoryStorage.csproj" />
     <ProjectReference Include="..\Notino_project.Application\Notino_project.Application.csproj" />
   </ItemGroup>
 

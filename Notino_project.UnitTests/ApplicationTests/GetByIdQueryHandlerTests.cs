@@ -5,7 +5,7 @@ using Notino_project.Application.Caching;
 using Notino_project.Application.Queries;
 using Notino_project.Contract.Responses;
 using Notino_project.Core.Aggregates;
-using Notino_project.Repositories.Interfaces.Repositories;
+using Notino_project.Core.Repositories;
 using System.Text.Json;
 using Xunit;
 
@@ -17,7 +17,7 @@ namespace Notino_project.UnitTests.ApplicationTests
         public async Task GetById_DocumentDoesNotExist_ReturnsNotFound()
         {
             var id = Guid.NewGuid();
-            var repository = new Mock<IDocumentsRepository>();
+            var repository = new Mock<IDocumentsReadRepository>();
             using var cache = new MemoryCache(new MemoryCacheOptions());
             var handler = new GetByIdQueryHandler(repository.Object, cache);
 
@@ -33,7 +33,7 @@ namespace Notino_project.UnitTests.ApplicationTests
         {
             var id = Guid.NewGuid();
             var document = CreateDocument(id);
-            var repository = new Mock<IDocumentsRepository>();
+            var repository = new Mock<IDocumentsReadRepository>();
             repository.Setup(mock => mock.GetById(id)).ReturnsAsync(document);
 
             var cacheEntry = new Mock<ICacheEntry>();
@@ -66,7 +66,7 @@ namespace Notino_project.UnitTests.ApplicationTests
         {
             var id = Guid.NewGuid();
             var document = CreateDocument(id);
-            var repository = new Mock<IDocumentsRepository>();
+            var repository = new Mock<IDocumentsReadRepository>();
             using var cache = new MemoryCache(new MemoryCacheOptions());
             cache.Set(DocumentCacheKeys.For(id), document, new MemoryCacheEntryOptions
             {

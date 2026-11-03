@@ -7,9 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project", "Notino_pr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Application", "Notino_project.Application\Notino_project.Application.csproj", "{5A486E5F-6003-490F-84D5-6D82DC854283}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Repositories.Interfaces", "Notino_project.Repositories.Interfaces\Notino_project.Repositories.Interfaces.csproj", "{8C0869EE-8CFA-4FCD-8B04-606612940EE7}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.FakeInMemoryRepo", "Notino_project.FakeInMemoryRepo\Notino_project.FakeInMemoryRepo.csproj", "{55265C3C-EC55-4E5B-AFA4-9113F117AF49}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Infrastructure.FakeInMemoryStorage", "Notino_project.Infrastructure.FakeInMemoryStorage\Notino_project.Infrastructure.FakeInMemoryStorage.csproj", "{55265C3C-EC55-4E5B-AFA4-9113F117AF49}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Core", "Notino_project.Core\Notino_project.Core.csproj", "{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}"
 EndProject
@@ -33,14 +31,6 @@ Global
 		{5A486E5F-6003-490F-84D5-6D82DC854283}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5A486E5F-6003-490F-84D5-6D82DC854283}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5A486E5F-6003-490F-84D5-6D82DC854283}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8C0869EE-8CFA-4FCD-8B04-606612940EE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8C0869EE-8CFA-4FCD-8B04-606612940EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8C0869EE-8CFA-4FCD-8B04-606612940EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{8C0869EE-8CFA-4FCD-8B04-606612940EE7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{55265C3C-EC55-4E5B-AFA4-9113F117AF49}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{55265C3C-EC55-4E5B-AFA4-9113F117AF49}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{55265C3C-EC55-4E5B-AFA4-9113F117AF49}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{55265C3C-EC55-4E5B-AFA4-9113F117AF49}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}.Release|Any CPU.ActiveCfg = Release|Any CPU

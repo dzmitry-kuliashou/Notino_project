@@ -7,7 +7,7 @@ using Notino_project.Application.Errors;
 using Notino_project.Application.Validators;
 using Notino_project.Contract.Requests;
 using Notino_project.Core.Aggregates;
-using Notino_project.Repositories.Interfaces.Repositories;
+using Notino_project.Core.Repositories;
 using System.Text.Json;
 using Xunit;
 
@@ -19,10 +19,12 @@ namespace Notino_project.UnitTests.ApplicationTests
         public async Task Update_InvalidRequest_ReturnsBadRequestWithoutReading()
         {
             var id = Guid.NewGuid();
-            var repository = new Mock<IDocumentsRepository>();
+            var readRepository = new Mock<IDocumentsReadRepository>();
+            var writeRepository = new Mock<IDocumentsWriteRepository>();
             using var cache = new MemoryCache(new MemoryCacheOptions());
             var handler = new UpdateDocumentCommandHandler(
-                repository.Object,
+                readRepository.Object,
+                writeRepository.Object,
                 new UpdateDocumentRequestValidator(),
                 cache);
             var request = new UpdateDocumentRequest
@@ -43,18 +45,20 @@ namespace Notino_project.UnitTests.ApplicationTests
                     DocumentValidationErrors.JsonElementMustBeObject
                 },
                 errors);
-            repository.Verify(mock => mock.GetById(It.IsAny<Guid>()), Times.Never);
-            repository.Verify(mock => mock.Update(It.IsAny<Document>()), Times.Never);
+            readRepository.Verify(mock => mock.GetById(It.IsAny<Guid>()), Times.Never);
+            writeRepository.Verify(mock => mock.Update(It.IsAny<Document>()), Times.Never);
         }
 
         [Fact]
         public async Task Update_DocumentDoesNotExist_ReturnsNotFound()
         {
             var id = Guid.NewGuid();
-            var repository = new Mock<IDocumentsRepository>();
+            var readRepository = new Mock<IDocumentsReadRepository>();
+            var writeRepository = new Mock<IDocumentsWriteRepository>();
             using var cache = new MemoryCache(new MemoryCacheOptions());
             var handler = new UpdateDocumentCommandHandler(
-                repository.Object,
+                readRepository.Object,
+                writeRepository.Object,
                 new UpdateDocumentRequestValidator(),
                 cache);
 
@@ -63,8 +67,8 @@ namespace Notino_project.UnitTests.ApplicationTests
                 CancellationToken.None);
 
             Assert.IsType<NotFoundResult>(result);
-            repository.Verify(mock => mock.GetById(id), Times.Once);
-            repository.Verify(mock => mock.Update(It.IsAny<Document>()), Times.Never);
+            readRepository.Verify(mock => mock.GetById(id), Times.Once);
+            writeRepository.Verify(mock => mock.Update(It.IsAny<Document>()), Times.Never);
             Assert.False(cache.TryGetValue(DocumentCacheKeys.For(id), out _));
         }
 
@@ -76,9 +80,10 @@ namespace Notino_project.UnitTests.ApplicationTests
             var existing = Document.Construct(["old"], initialJson.RootElement.Clone());
             existing.Id = id;
             var request = CreateValidRequest();
-            var repository = new Mock<IDocumentsRepository>();
-            repository.Setup(mock => mock.GetById(id)).ReturnsAsync(existing);
-            repository.Setup(mock => mock.Update(It.IsAny<Document>())).ReturnsAsync(existing);
+            var readRepository = new Mock<IDocumentsReadRepository>();
+            readRepository.Setup(mock => mock.GetById(id)).ReturnsAsync(existing);
+            var writeRepository = new Mock<IDocumentsWriteRepository>();
+            writeRepository.Setup(mock => mock.Update(It.IsAny<Document>())).ReturnsAsync(existing);
 
             var cacheEntries = new List<Mock<ICacheEntry>>();
             var cache = new Mock<IMemoryCache>();
@@ -95,7 +100,8 @@ namespace Notino_project.UnitTests.ApplicationTests
             });
 
             var handler = new UpdateDocumentCommandHandler(
-                repository.Object,
+                readRepository.Object,
+                writeRepository.Object,
                 new UpdateDocumentRequestValidator(),
                 cache.Object);
 
@@ -108,8 +114,8 @@ namespace Notino_project.UnitTests.ApplicationTests
             Assert.Equal(id, documentResponse.Id);
             Assert.Equal(new[] { "test" }, documentResponse.Tags);
             Assert.Equal("test", documentResponse.Data["name"]);
-            repository.Verify(mock => mock.GetById(id), Times.Once);
-            repository.Verify(mock => mock.Update(It.Is<Document>(document => document.Id == id)), Times.Once);
+            readRepository.Verify(mock => mock.GetById(id), Times.Once);
+            writeRepository.Verify(mock => mock.Update(It.Is<Document>(document => document.Id == id)), Times.Once);
             cache.Verify(mock => mock.CreateEntry(DocumentCacheKeys.For(id)), Times.Exactly(2));
             Assert.Same(existing, cacheEntries[1].Object.Value);
             Assert.Equal(DocumentCachePolicy.AbsoluteExpirationRelativeToNow, cacheEntries[1].Object.AbsoluteExpirationRelativeToNow);

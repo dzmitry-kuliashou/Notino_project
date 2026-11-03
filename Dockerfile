@@ -2,26 +2,21 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copy everything
-COPY Notino_project.sln ./
-COPY Notino_project.Core/*.csproj ./Notino_project.Core/
-COPY Notino_project.Repositories.Interfaces/*.csproj ./Notino_project.Repositories.Interfaces/
-COPY Notino_project.FakeInMemoryRepo/*.csproj ./Notino_project.FakeInMemoryRepo/
-COPY Notino_project.Services.Interfaces/*.csproj ./Notino_project.Services.Interfaces/
-COPY Notino_project.Services/*.csproj ./Notino_project.Services/
-COPY Notino_project.UnitTests/*.csproj ./Notino_project.UnitTests/
-COPY Notino_project.IntegrationTests/*.csproj ./Notino_project.IntegrationTests/
-COPY Notino_project/*.csproj ./Notino_project/
+# Copy production project files for dependency restore
+COPY Notino_project/Notino_project.csproj ./Notino_project/
+COPY Notino_project.Application/Notino_project.Application.csproj ./Notino_project.Application/
+COPY Notino_project.Contract/Notino_project.Contract.csproj ./Notino_project.Contract/
+COPY Notino_project.Core/Notino_project.Core.csproj ./Notino_project.Core/
+COPY Notino_project.Infrastructure.FakeInMemoryStorage/Notino_project.Infrastructure.FakeInMemoryStorage.csproj ./Notino_project.Infrastructure.FakeInMemoryStorage/
 
-# Restore as distinct layers
-RUN dotnet restore
+RUN dotnet restore Notino_project/Notino_project.csproj
 
 # Copy the rest of the code
 COPY . .
 
 # Build and publish the main project
 WORKDIR /app/Notino_project
-RUN dotnet publish -c Release -o /app/out
+RUN dotnet publish -c Release --no-restore -o /app/out
 
 # Build runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS final

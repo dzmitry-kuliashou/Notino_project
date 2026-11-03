@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit;
 using Notino_project.Application.Errors;
-using Notino_project.Repositories.Interfaces.Repositories;
+using Notino_project.Core.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
 using System.Net.Http.Json;
@@ -17,8 +17,10 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
         {
             builder.ConfigureServices((context, services) =>
             {
-                services.RemoveAll<IDocumentsRepository>();
-                services.AddScoped<IDocumentsRepository, DocumentsRepositoryStub>();
+                services.RemoveAll<IDocumentsReadRepository>();
+                services.RemoveAll<IDocumentsWriteRepository>();
+                services.AddScoped<IDocumentsReadRepository, DocumentsRepositoryStub>();
+                services.AddScoped<IDocumentsWriteRepository, DocumentsRepositoryStub>();
             });
         }
     }

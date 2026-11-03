@@ -6,14 +6,14 @@ using Notino_project.Application.Caching;
 using Notino_project.Application.Mappers;
 using Notino_project.Contract.Requests;
 using Notino_project.Core.Aggregates;
-using Notino_project.Repositories.Interfaces.Repositories;
+using Notino_project.Core.Repositories;
 
 namespace Notino_project.Application.Commands
 {
     public sealed record CreateDocumentCommand(CreateDocumentRequest Request) : IRequest<IActionResult>;
 
     public sealed class CreateDocumentCommandHandler(
-        IDocumentsRepository repository,
+        IDocumentsWriteRepository repository,
         IValidator<CreateDocumentRequest> validator,
         IMemoryCache cache) : IRequestHandler<CreateDocumentCommand, IActionResult>
     {

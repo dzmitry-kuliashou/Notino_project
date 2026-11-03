@@ -1,7 +1,7 @@
-﻿using Notino_project.FakeInMemoryRepo.StorageModels;
+﻿using Notino_project.Infrastructure.FakeInMemoryStorage.StorageModels;
 using System.Collections.Concurrent;
 
-namespace Notino_project.FakeInMemoryRepo
+namespace Notino_project.Infrastructure.FakeInMemoryStorage
 {
     public static class DocumentsStorage
     {

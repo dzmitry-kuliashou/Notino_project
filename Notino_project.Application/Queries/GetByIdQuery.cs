@@ -4,14 +4,14 @@ using Microsoft.Extensions.Caching.Memory;
 using Notino_project.Application.Caching;
 using Notino_project.Application.Mappers;
 using Notino_project.Core.Aggregates;
-using Notino_project.Repositories.Interfaces.Repositories;
+using Notino_project.Core.Repositories;
 
 namespace Notino_project.Application.Queries
 {
     public sealed record GetByIdQuery(Guid Id) : IRequest<IActionResult>;
 
     public sealed class GetByIdQueryHandler(
-        IDocumentsRepository repository,
+        IDocumentsReadRepository repository,
         IMemoryCache cache) : IRequestHandler<GetByIdQuery, IActionResult>
     {
         public async Task<IActionResult> Handle(GetByIdQuery request, CancellationToken cancellationToken)

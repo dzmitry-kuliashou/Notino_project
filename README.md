@@ -6,12 +6,11 @@ The solution is a .NET 8 document API. The API controller dispatches document op
 
 ## Projects
 
-- **Notino_project** — ASP.NET Core API. `DocumentController` exposes `GET /documents/{id}`, `POST /documents`, and `PUT /documents/{id}` and forwards requests through `ISender`. `Program.cs` registers the Application handlers and validators, memory cache, and in-memory repository. Responses support JSON, XML, and MessagePack; JSON is used when the requested `Accept` format is unsupported.
+- **Notino_project** — ASP.NET Core API. `DocumentController` exposes `GET /documents/{id}`, `POST /documents`, and `PUT /documents/{id}` and forwards requests through `ISender`. `Program.cs` registers the Application handlers and validators, memory cache, and separate in-memory read and write repositories. Responses support JSON, XML, and MessagePack; JSON is used when the requested `Accept` format is unsupported.
 - **Notino_project.Application** — MediatR query and command handlers, FluentValidation request validators, response mapper, validation messages, and shared cache key and expiration policy.
 - **Notino_project.Contract** — API request and response models. `DocumentResponse.Data` is a string dictionary, while request data uses `JsonElement`.
-- **Notino_project.Core** — `Document` aggregate and shared `AggregateRoot`. The aggregate enforces its tag and JSON-data invariants.
-- **Notino_project.Repositories.Interfaces** — `IDocumentsRepository`, the storage abstraction used by handlers.
-- **Notino_project.FakeInMemoryRepo** — In-memory repository implementation backed by a concurrent dictionary and a storage-specific model.
+- **Notino_project.Core** — `Document` aggregate, shared `AggregateRoot`, and the `IDocumentsReadRepository` / `IDocumentsWriteRepository` contracts. The aggregate enforces its tag and JSON-data invariants.
+- **Notino_project.Infrastructure.FakeInMemoryStorage** — Separate fake read and write repository implementations backed by shared in-memory storage and a storage-specific model.
 - **Notino_project.UnitTests** — Controller dispatch, Application handler and cache behavior, and request-validator unit tests.
 - **Notino_project.IntegrationTests** — API formatter and validation tests that run through the real Application handlers with a repository test double.
 

@@ -1,7 +1,7 @@
-﻿using Notino_project.FakeInMemoryRepo.StorageModels;
+﻿using Notino_project.Infrastructure.FakeInMemoryStorage.StorageModels;
 using Notino_project.Core.Aggregates;
 
-namespace Notino_project.FakeInMemoryRepo.Mappers
+namespace Notino_project.Infrastructure.FakeInMemoryStorage.Mappers
 {
     public static class DocumentMappers
     {

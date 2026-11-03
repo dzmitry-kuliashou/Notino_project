@@ -6,14 +6,15 @@ using Notino_project.Application.Caching;
 using Notino_project.Application.Mappers;
 using Notino_project.Contract.Requests;
 using Notino_project.Core.Aggregates;
-using Notino_project.Repositories.Interfaces.Repositories;
+using Notino_project.Core.Repositories;
 
 namespace Notino_project.Application.Commands
 {
     public sealed record UpdateDocumentCommand(Guid Id, UpdateDocumentRequest Request) : IRequest<IActionResult>;
 
     public sealed class UpdateDocumentCommandHandler(
-        IDocumentsRepository repository,
+        IDocumentsReadRepository readRepository,
+        IDocumentsWriteRepository writeRepository,
         IValidator<UpdateDocumentRequest> validator,
         IMemoryCache cache) : IRequestHandler<UpdateDocumentCommand, IActionResult>
     {
@@ -28,7 +29,7 @@ namespace Notino_project.Application.Commands
             var cacheKey = DocumentCacheKeys.For(command.Id);
             if (!cache.TryGetValue(cacheKey, out Document? existing))
             {
-                existing = await repository.GetById(command.Id);
+                existing = await readRepository.GetById(command.Id);
 
                 if (existing is not null)
                 {
@@ -42,7 +43,7 @@ namespace Notino_project.Application.Commands
             }
 
             existing.Update(command.Request.Tags, command.Request.Data);
-            var updated = await repository.Update(existing);
+            var updated = await writeRepository.Update(existing);
             cache.Set(cacheKey, updated, CreateCacheEntryOptions());
 
             return new OkObjectResult(updated.ToResponse());

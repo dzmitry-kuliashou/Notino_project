@@ -4,9 +4,9 @@ using MessagePack.Resolvers;
 using Microsoft.OpenApi.Models;
 using Notino_project.Application.Queries;
 using Notino_project.Application.Validators;
-using Notino_project.FakeInMemoryRepo.Repositories;
+using Notino_project.Core.Repositories;
+using Notino_project.Infrastructure.FakeInMemoryStorage.Repositories;
 using Notino_project.ModelBinders;
-using Notino_project.Repositories.Interfaces.Repositories;
 using Notino_project.SwaggerFilters;
 using FluentValidation;
 
@@ -42,7 +42,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddMemoryCache();
 
-builder.Services.AddScoped<IDocumentsRepository, FakeInMemoryDocumentsRepository>();
+builder.Services.AddScoped<IDocumentsReadRepository, FakeInMemoryDocumentsReadRepository>();
+builder.Services.AddScoped<IDocumentsWriteRepository, FakeInMemoryDocumentsWriteRepository>();
 builder.Services.AddMediatR(configuration =>
     configuration.RegisterServicesFromAssembly(typeof(GetByIdQuery).Assembly));
 builder.Services.AddValidatorsFromAssembly(typeof(CreateDocumentRequestValidator).Assembly);

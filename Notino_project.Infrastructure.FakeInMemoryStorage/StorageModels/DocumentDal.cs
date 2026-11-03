@@ -1,6 +1,6 @@
 ﻿using System.Text.Json;
 
-namespace Notino_project.FakeInMemoryRepo.StorageModels
+namespace Notino_project.Infrastructure.FakeInMemoryStorage.StorageModels
 {
     public class DocumentDal
     {
