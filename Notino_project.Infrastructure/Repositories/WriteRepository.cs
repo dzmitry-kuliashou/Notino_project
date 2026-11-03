@@ -45,4 +45,10 @@ public abstract class WriteRepository<TAggregate, TStorageModel>(
 
         return aggregate;
     }
+
+    public async Task Delete(TAggregate aggregate)
+    {
+        aggregate.Delete();
+        await Update(aggregate);
+    }
 }

@@ -118,8 +118,7 @@ namespace Notino_project.IntegrationTests
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
 
-            document.Delete();
-            await _writeRepository.Update(document);
+            await _writeRepository.Delete(document);
 
             Assert.IsNull(await _readRepository.GetById(document.Id));
         }
@@ -137,8 +136,7 @@ namespace Notino_project.IntegrationTests
 
                 if (!activeIds.Contains(id))
                 {
-                    document.Delete();
-                    await _writeRepository.Update(document);
+                    await _writeRepository.Delete(document);
                 }
             }
 
@@ -158,8 +156,7 @@ namespace Notino_project.IntegrationTests
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
 
-            document.Delete();
-            await _writeRepository.Update(document);
+            await _writeRepository.Delete(document);
 
             await Assert.ThrowsExceptionAsync<AggregateNotFoundException>(
                 () => _writeRepository.Update(document));
@@ -209,6 +206,17 @@ namespace Notino_project.IntegrationTests
                 () => _writeRepository.Update(document));
 
             Assert.IsNull(await _readRepository.GetById(document.Id));
+        }
+
+        [Fact]
+        public async Task Delete_MissingDocument_ThrowsAggregateNotFoundException()
+        {
+            using var jsonDocument = JsonDocument.Parse("""{"name":"missing"}""");
+            var document = Document.Construct(["missing"], jsonDocument.RootElement.Clone());
+            document.Id = Guid.NewGuid();
+
+            await Assert.ThrowsExceptionAsync<AggregateNotFoundException>(
+                () => _writeRepository.Delete(document));
         }
     }
 }

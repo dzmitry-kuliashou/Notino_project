@@ -46,7 +46,7 @@ namespace Notino_project.UnitTests.ApplicationTests
 
             Assert.IsType<NotFoundResult>(result);
             _readRepository.Verify(mock => mock.GetById(id), Times.Once);
-            _writeRepository.Verify(mock => mock.Update(It.IsAny<Document>()), Times.Never);
+            _writeRepository.Verify(mock => mock.Delete(It.IsAny<Document>()), Times.Never);
             Assert.False(_cache.TryGetValue(DocumentCacheKeys.For(id), out _));
         }
 
@@ -57,8 +57,9 @@ namespace Notino_project.UnitTests.ApplicationTests
             var existing = CreateDocument(id);
             _readRepository.Setup(mock => mock.GetById(id)).ReturnsAsync(existing);
             _writeRepository
-                .Setup(mock => mock.Update(It.IsAny<Document>()))
-                .ReturnsAsync(existing);
+                .Setup(mock => mock.Delete(It.IsAny<Document>()))
+                .Callback<Document>(document => document.Delete())
+                .Returns(Task.CompletedTask);
             _cache.Set(DocumentCacheKeys.For(id), existing);
 
             var result = await _handler.Handle(
@@ -68,7 +69,7 @@ namespace Notino_project.UnitTests.ApplicationTests
             Assert.IsType<NoContentResult>(result);
             _readRepository.Verify(mock => mock.GetById(id), Times.Once);
             _writeRepository.Verify(
-                mock => mock.Update(It.Is<Document>(document => document.Id == id && document.IsDeleted)),
+                mock => mock.Delete(It.Is<Document>(document => document.Id == id && document.IsDeleted)),
                 Times.Once);
             Assert.False(_cache.TryGetValue(DocumentCacheKeys.For(id), out _));
         }
@@ -80,7 +81,7 @@ namespace Notino_project.UnitTests.ApplicationTests
             var existing = CreateDocument(id);
             _readRepository.Setup(mock => mock.GetById(id)).ReturnsAsync(existing);
             _writeRepository
-                .Setup(mock => mock.Update(It.IsAny<Document>()))
+                .Setup(mock => mock.Delete(It.IsAny<Document>()))
                 .ThrowsAsync(new AggregateNotFoundException(id));
             _cache.Set(DocumentCacheKeys.For(id), existing);
 
@@ -91,7 +92,7 @@ namespace Notino_project.UnitTests.ApplicationTests
             Assert.IsType<NotFoundResult>(result);
             _readRepository.Verify(mock => mock.GetById(id), Times.Once);
             _writeRepository.Verify(
-                mock => mock.Update(It.Is<Document>(document => document.Id == id && document.IsDeleted)),
+                mock => mock.Delete(It.Is<Document>(document => document.Id == id)),
                 Times.Once);
             Assert.False(_cache.TryGetValue(DocumentCacheKeys.For(id), out _));
         }

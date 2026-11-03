@@ -8,4 +8,6 @@ public interface IWriteRepository<TAggregate>
     Task<TAggregate> Create(TAggregate aggregate);
 
     Task<TAggregate> Update(TAggregate aggregate);
+
+    Task Delete(TAggregate aggregate);
 }

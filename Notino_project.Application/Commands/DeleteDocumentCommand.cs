@@ -26,10 +26,9 @@ namespace Notino_project.Application.Commands
                 return new NotFoundResult();
             }
 
-            document.Delete();
             try
             {
-                await writeRepository.Update(document);
+                await writeRepository.Delete(document);
             }
             catch (AggregateNotFoundException)
             {

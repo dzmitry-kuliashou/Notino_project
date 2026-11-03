@@ -29,5 +29,11 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
 
         public Task<Document> Update(Document document) =>
             Task.FromResult(document);
+
+        public Task Delete(Document document)
+        {
+            document.Delete();
+            return Task.CompletedTask;
+        }
     }
 }
