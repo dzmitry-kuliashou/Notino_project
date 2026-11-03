@@ -1,4 +1,4 @@
-﻿using Notino_project.Models.Models;
+﻿using Notino_project.Core.Aggregates;
 
 namespace Notino_project.Repositories.Interfaces.Repositories
 {

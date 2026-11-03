@@ -1,6 +1,6 @@
 ﻿using Notino_project.FakeInMemoryRepo.Mappers;
 using Notino_project.FakeInMemoryRepo.StorageModels;
-using Notino_project.Models.Models;
+using Notino_project.Core.Aggregates;
 using Notino_project.Repositories.Interfaces.Repositories;
 
 namespace Notino_project.FakeInMemoryRepo.Repositories
@@ -16,14 +16,11 @@ namespace Notino_project.FakeInMemoryRepo.Repositories
                 return Task.FromResult<Document>(null);
             }
 
-            return Task.FromResult(existingDocument.ToDocument());
+            return Task.FromResult(existingDocument.ToAggregateDocument());
         }
 
         public Task<Document> Create(Document document)
         {
-            var id = Guid.NewGuid();
-            document.Id = id;
-
             var documentDal = document.ToDocumentDal();
 
             DocumentsStorage.Documents.TryAdd(document.Id.ToString(), documentDal);
@@ -33,7 +30,7 @@ namespace Notino_project.FakeInMemoryRepo.Repositories
 
         public Task<Document> Update(Document document)
         {
-            if (string.IsNullOrEmpty(document.Id.ToString()))
+            if (document.Id == Guid.Empty)
             {
                 throw new Exception("Document Id is not defined.");
             }
@@ -48,7 +45,7 @@ namespace Notino_project.FakeInMemoryRepo.Repositories
             existingDocument.Tags = document.Tags;
             existingDocument.Data = document.Data;
 
-            return Task.FromResult(existingDocument.ToDocument());
+            return Task.FromResult(existingDocument.ToAggregateDocument());
         }
 
         private DocumentDal? TryGetExistingDocument(string id)

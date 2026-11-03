@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Notino_project.Controllers;
+using Notino_project.Core.Aggregates;
 using Notino_project.Dtos.Document;
-using Notino_project.Models.Models;
 using Notino_project.Services.Interfaces.Services.Documents;
 using System.Text.Json;
 using Xunit;
@@ -55,12 +55,9 @@ namespace Notino_project.UnitTests.ControllerTests
                 data = root.GetProperty("data").Clone();
             }
 
-            return new Document
-            {
-                Id = id,
-                Tags = ["a"],
-                Data = data
-            };
+            var document = Document.Construct(["a"], data);
+            document.Id = id;
+            return document;
         }
 
         //We can similarly test another Controller's methods

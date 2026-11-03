@@ -12,9 +12,9 @@ The Notino_project solution contains the following projects and components:
   - `Data` is a mandatory `JsonElement` property, allowing for an arbitrary schema. It must be an object type with at least one property, and only string properties are allowed. Validation rules are defined in the `SimplePropertiesOnlyAttribute` class.
 - `Return Model`: The `Data` field is defined as `Dictionary<string, string>`, allowing it to be serialized into different data formats (JSON, XML, MessagePack). For deserializing `JsonElement` into `Dictionary<string, string>`, a custom `DynamicDataModelBinder` is used.
 - `API Response Format`: The API allows defining the return data format via the `Accept` request header. It supports JSON (by default), XML, and MessagePack formats. If any other `Accept` header is defined, the API returns data in JSON. New formats can be easily added using formatters in the `Program.cs` file.
-- Mappers: These convert DTO models to/from service layer models.
-## 2. Notino_project.Models
-- This project contains models (specifically, the `Document` model) for the application's service layer, allowing for a complete separation of client-distributed models from internal application models.
+- Mappers: The controller constructs or updates the Core aggregate from validated DTO values, and the API mapper converts it to the response DTO.
+## 2. Notino_project.Core
+- This project contains the `Document` aggregate and shared `AggregateRoot`. The aggregate owns its identity and enforces nonempty tags and nonempty JSON objects containing only string values.
 ## 3. Notino_project.Services.Interfaces
 - This project contains service interfaces (specifically, `IDocumentsService`), implementing the Dependency Injection principle. Although `IDocumentsService` includes all methods for manipulating documents, which breaks the Single Responsibility principle, it was done for simplicity in this small project. In a larger project, separate services for each operation would be preferable.
 ## 4. Notino_project.Services
@@ -33,4 +33,3 @@ The Notino_project solution contains the following projects and components:
 
 ## Docker
 Additionally, this solution includes a Dockerfile, allowing the creation of a Docker image to run the application as a Docker container.
-

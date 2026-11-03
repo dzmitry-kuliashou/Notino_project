@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Copy everything
 COPY Notino_project.sln ./
-COPY Notino_project.Models/*.csproj ./Notino_project.Models/
+COPY Notino_project.Core/*.csproj ./Notino_project.Core/
 COPY Notino_project.Repositories.Interfaces/*.csproj ./Notino_project.Repositories.Interfaces/
 COPY Notino_project.FakeInMemoryRepo/*.csproj ./Notino_project.FakeInMemoryRepo/
 COPY Notino_project.Services.Interfaces/*.csproj ./Notino_project.Services.Interfaces/

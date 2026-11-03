@@ -1,17 +1,16 @@
 ﻿using Notino_project.FakeInMemoryRepo.StorageModels;
-using Notino_project.Models.Models;
+using Notino_project.Core.Aggregates;
 
 namespace Notino_project.FakeInMemoryRepo.Mappers
 {
     public static class DocumentMappers
     {
-        public static Document ToDocument(this DocumentDal documentDal) =>
-            new()
-            {
-                Id = documentDal.Id,
-                Tags = documentDal.Tags,
-                Data = documentDal.Data,
-            };
+        public static Document ToAggregateDocument(this DocumentDal documentDal)
+        {
+            var document = Document.Construct(documentDal.Tags, documentDal.Data);
+            document.Id = documentDal.Id;
+            return document;
+        }
 
         public static DocumentDal ToDocumentDal(this Document document) =>
             new()

@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Notino_project.Models\Notino_project.Models.csproj" />
+    <ProjectReference Include="..\Notino_project.Core\Notino_project.Core.csproj" />
     <ProjectReference Include="..\Notino_project.Repositories.Interfaces\Notino_project.Repositories.Interfaces.csproj" />
   </ItemGroup>
 

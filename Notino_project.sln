@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Repositories
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.FakeInMemoryRepo", "Notino_project.FakeInMemoryRepo\Notino_project.FakeInMemoryRepo.csproj", "{55265C3C-EC55-4E5B-AFA4-9113F117AF49}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Models", "Notino_project.Models\Notino_project.Models.csproj", "{E6073CEE-2BB8-4A6B-9337-DF1730F748A4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Core", "Notino_project.Core\Notino_project.Core.csproj", "{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.UnitTests", "Notino_project.UnitTests\Notino_project.UnitTests.csproj", "{C961CE71-ED5B-4670-9576-322930F44190}"
 EndProject
@@ -45,10 +45,10 @@ Global
 		{55265C3C-EC55-4E5B-AFA4-9113F117AF49}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55265C3C-EC55-4E5B-AFA4-9113F117AF49}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55265C3C-EC55-4E5B-AFA4-9113F117AF49}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E6073CEE-2BB8-4A6B-9337-DF1730F748A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E6073CEE-2BB8-4A6B-9337-DF1730F748A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E6073CEE-2BB8-4A6B-9337-DF1730F748A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E6073CEE-2BB8-4A6B-9337-DF1730F748A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BF1821F3-7A6B-4EDE-A272-9D1F3D1A6237}.Release|Any CPU.Build.0 = Release|Any CPU
 		{C961CE71-ED5B-4670-9576-322930F44190}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C961CE71-ED5B-4670-9576-322930F44190}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C961CE71-ED5B-4670-9576-322930F44190}.Release|Any CPU.ActiveCfg = Release|Any CPU

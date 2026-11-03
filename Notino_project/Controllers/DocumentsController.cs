@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Notino_project.Core.Aggregates;
 using Notino_project.Dtos.Document;
 using Notino_project.Mappers;
 using Notino_project.Services.Interfaces.Services.Documents;
@@ -41,7 +41,7 @@ namespace Notino_project.Controllers
                 return BadRequest(ModelState);
             }
 
-            var document = createDocumentModel.ToDocumentFromCreateDto();
+            var document = Document.Construct(createDocumentModel.Tags, createDocumentModel.Data);
 
             var created = await _documentsService.Create(document);
 
@@ -63,8 +63,8 @@ namespace Notino_project.Controllers
                 return NotFound();
             }
 
-            var document = updateDocumentModel.ToDocumentFromUpdateDto(id);
-            var updated = await _documentsService.Update(document);
+            existing.Update(updateDocumentModel.Tags, updateDocumentModel.Data);
+            var updated = await _documentsService.Update(existing);
 
             return Ok(updated.ToDocumentDto());
         }

@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using Notino_project.Models.Models;
+using Notino_project.Core.Aggregates;
 using Notino_project.Repositories.Interfaces.Repositories;
 using Notino_project.Services.Services.Documents;
 using System.Text.Json;
@@ -68,12 +68,9 @@ namespace Notino_project.UnitTests.ServicesTests
                 data = root.GetProperty("data").Clone();
             }
 
-            return new Document
-            {
-                Id = id,
-                Tags = ["a"],
-                Data = data
-            };
+            var document = Document.Construct(["a"], data);
+            document.Id = id;
+            return document;
         }
     }
 }

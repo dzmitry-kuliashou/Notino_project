@@ -181,3 +181,6 @@ _site/
 
 # Environment variables
 .env
+
+# github copilot instructions
+.github/

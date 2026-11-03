@@ -1,5 +1,5 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
-using Notino_project.Models.Models;
+using Notino_project.Core.Aggregates;
 using Notino_project.Repositories.Interfaces.Repositories;
 using Notino_project.Services.Interfaces.Services.Documents;
 
