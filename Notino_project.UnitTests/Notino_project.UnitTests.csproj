@@ -34,7 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Notino_project.Core\Notino_project.Core.csproj" />
-    <ProjectReference Include="..\Notino_project.Services.Interfaces\Notino_project.Services.Interfaces.csproj" />
+    <ProjectReference Include="..\Notino_project.Application\Notino_project.Application.csproj" />
     <ProjectReference Include="..\Notino_project\Notino_project.csproj" />
   </ItemGroup>
 

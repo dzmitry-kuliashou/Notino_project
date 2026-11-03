@@ -2,13 +2,12 @@ using MessagePack;
 using MessagePack.AspNetCoreMvcFormatter;
 using MessagePack.Resolvers;
 using Microsoft.OpenApi.Models;
+using Notino_project.Application.Queries;
+using Notino_project.Application.Validators;
 using Notino_project.FakeInMemoryRepo.Repositories;
 using Notino_project.ModelBinders;
 using Notino_project.Repositories.Interfaces.Repositories;
-using Notino_project.Services.Interfaces.Services.Documents;
-using Notino_project.Services.Services.Documents;
 using Notino_project.SwaggerFilters;
-using Notino_project.Validators;
 using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -43,9 +42,10 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddMemoryCache();
 
-builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 builder.Services.AddScoped<IDocumentsRepository, FakeInMemoryDocumentsRepository>();
-builder.Services.AddValidatorsFromAssemblyContaining<CreateDocumentRequestValidator>();
+builder.Services.AddMediatR(configuration =>
+    configuration.RegisterServicesFromAssembly(typeof(GetByIdQuery).Assembly));
+builder.Services.AddValidatorsFromAssembly(typeof(CreateDocumentRequestValidator).Assembly);
 
 var app = builder.Build();
 

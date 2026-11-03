@@ -5,9 +5,7 @@ VisualStudioVersion = 17.9.34902.65
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project", "Notino_project\Notino_project.csproj", "{D7D00802-9717-4FFD-B4CC-B75A120E36EE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Services.Interfaces", "Notino_project.Services.Interfaces\Notino_project.Services.Interfaces.csproj", "{2C12CE97-5BED-461C-8684-A93763D61578}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Services", "Notino_project.Services\Notino_project.Services.csproj", "{FF4007E7-22F5-47D9-87EB-A55167A48E99}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Application", "Notino_project.Application\Notino_project.Application.csproj", "{5A486E5F-6003-490F-84D5-6D82DC854283}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Notino_project.Repositories.Interfaces", "Notino_project.Repositories.Interfaces\Notino_project.Repositories.Interfaces.csproj", "{8C0869EE-8CFA-4FCD-8B04-606612940EE7}"
 EndProject
@@ -31,14 +29,10 @@ Global
 		{D7D00802-9717-4FFD-B4CC-B75A120E36EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7D00802-9717-4FFD-B4CC-B75A120E36EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7D00802-9717-4FFD-B4CC-B75A120E36EE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{2C12CE97-5BED-461C-8684-A93763D61578}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{2C12CE97-5BED-461C-8684-A93763D61578}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{2C12CE97-5BED-461C-8684-A93763D61578}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{2C12CE97-5BED-461C-8684-A93763D61578}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FF4007E7-22F5-47D9-87EB-A55167A48E99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FF4007E7-22F5-47D9-87EB-A55167A48E99}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FF4007E7-22F5-47D9-87EB-A55167A48E99}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FF4007E7-22F5-47D9-87EB-A55167A48E99}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A486E5F-6003-490F-84D5-6D82DC854283}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A486E5F-6003-490F-84D5-6D82DC854283}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A486E5F-6003-490F-84D5-6D82DC854283}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A486E5F-6003-490F-84D5-6D82DC854283}.Release|Any CPU.Build.0 = Release|Any CPU
 		{8C0869EE-8CFA-4FCD-8B04-606612940EE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{8C0869EE-8CFA-4FCD-8B04-606612940EE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8C0869EE-8CFA-4FCD-8B04-606612940EE7}.Release|Any CPU.ActiveCfg = Release|Any CPU

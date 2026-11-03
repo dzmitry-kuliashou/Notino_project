@@ -1,11 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using MediatR;
 using Moq;
 using Notino_project.Controllers;
+using Notino_project.Application.Commands;
+using Notino_project.Application.Queries;
+using Notino_project.Contract.Requests;
 using Notino_project.Contract.Responses;
-using Notino_project.Core.Aggregates;
-using Notino_project.Services.Interfaces.Services.Documents;
-using Notino_project.Validators;
-using System.Text.Json;
 using Xunit;
 
 namespace Notino_project.UnitTests.ControllerTests
@@ -13,18 +13,23 @@ namespace Notino_project.UnitTests.ControllerTests
     public class DocumentControllerTests
     {
         [Fact]
-        public async Task GetById_DocumentDoesNotExist_ReturnsNotFound()
+        public async Task GetById_DispatchesQueryAndReturnsHandlerResult()
         {
-            var mockDocumentsService = new Mock<IDocumentsService>();
+            var id = Guid.NewGuid();
+            var handlerResult = new NotFoundResult();
+            var sender = new Mock<ISender>();
+            sender.Setup(mock => mock.Send(It.IsAny<GetByIdQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(handlerResult);
+            var controller = new DocumentController(sender.Object);
 
-            var controller = new DocumentsController(
-                mockDocumentsService.Object,
-                new CreateDocumentRequestValidator(),
-                new UpdateDocumentRequestValidator());
+            var result = await controller.GetById(id);
 
-            var result = await controller.GetById(Guid.NewGuid());
-
-            Assert.IsType<NotFoundResult>(result);
+            Assert.Same(handlerResult, result);
+            sender.Verify(
+                mock => mock.Send(
+                    It.Is<GetByIdQuery>(query => query.Id == id),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
         [Fact]
@@ -32,13 +37,10 @@ namespace Notino_project.UnitTests.ControllerTests
         {
             var id = Guid.NewGuid();
 
-            var mockDocumentsService = new Mock<IDocumentsService>();
-            mockDocumentsService.Setup(m => m.GetById(id)).ReturnsAsync(GenerateValidDocument(id));
-
-            var controller = new DocumentsController(
-                mockDocumentsService.Object,
-                new CreateDocumentRequestValidator(),
-                new UpdateDocumentRequestValidator());
+            var sender = new Mock<ISender>();
+            sender.Setup(mock => mock.Send(It.IsAny<GetByIdQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(new OkObjectResult(new DocumentResponse { Id = id }));
+            var controller = new DocumentController(sender.Object);
 
             var result = await controller.GetById(id);
 
@@ -46,27 +48,46 @@ namespace Notino_project.UnitTests.ControllerTests
             Assert.IsType<DocumentResponse>(((OkObjectResult)result).Value);
         }
 
-        private Document GenerateValidDocument(Guid id)
+        [Fact]
+        public async Task Create_DispatchesCommandAndReturnsHandlerResult()
         {
-            var jsonInput = @"{
-                        ""data"": 
-                        {
-                            ""something"": ""This is data""
-                        }
-                    }";
+            var request = new CreateDocumentRequest();
+            var handlerResult = new AcceptedResult();
+            var sender = new Mock<ISender>();
+            sender.Setup(mock => mock.Send(It.IsAny<CreateDocumentCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(handlerResult);
+            var controller = new DocumentController(sender.Object);
 
-            JsonElement data;
-            using (var doc = JsonDocument.Parse(jsonInput))
-            {
-                var root = doc.RootElement;
-                data = root.GetProperty("data").Clone();
-            }
+            var result = await controller.Create(request);
 
-            var document = Document.Construct(["a"], data);
-            document.Id = id;
-            return document;
+            Assert.Same(handlerResult, result);
+            sender.Verify(
+                mock => mock.Send(
+                    It.Is<CreateDocumentCommand>(command => ReferenceEquals(command.Request, request)),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
         }
 
-        //We can similarly test another Controller's methods
+        [Fact]
+        public async Task Update_DispatchesCommandAndReturnsHandlerResult()
+        {
+            var id = Guid.NewGuid();
+            var request = new UpdateDocumentRequest();
+            var handlerResult = new AcceptedResult();
+            var sender = new Mock<ISender>();
+            sender.Setup(mock => mock.Send(It.IsAny<UpdateDocumentCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(handlerResult);
+            var controller = new DocumentController(sender.Object);
+
+            var result = await controller.Update(id, request);
+
+            Assert.Same(handlerResult, result);
+            sender.Verify(
+                mock => mock.Send(
+                    It.Is<UpdateDocumentCommand>(command =>
+                        command.Id == id && ReferenceEquals(command.Request, request)),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
     }
 }

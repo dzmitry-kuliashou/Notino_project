@@ -1,8 +1,10 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Xunit;
-using Notino_project.Services.Interfaces.Services.Documents;
+using Notino_project.Application.Errors;
+using Notino_project.Repositories.Interfaces.Repositories;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
 using System.Net.Http.Json;
@@ -15,7 +17,8 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
         {
             builder.ConfigureServices((context, services) =>
             {
-                services.AddScoped<IDocumentsService, DocumentsServiceStub>();
+                services.RemoveAll<IDocumentsRepository>();
+                services.AddScoped<IDocumentsRepository, DocumentsRepositoryStub>();
             });
         }
     }
@@ -39,7 +42,7 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
             var client = _factory.CreateClient();
             client.DefaultRequestHeaders.Add("Accept", acceptHeader);
 
-            var response = await client.GetAsync($"documents/{DocumentsServiceStub.ExistingDocumentId}");
+            var response = await client.GetAsync($"documents/{DocumentsRepositoryStub.ExistingDocumentId}");
 
             response.EnsureSuccessStatusCode();
             Assert.AreEqual(acceptHeader, response.Content.Headers.ContentType.MediaType);
@@ -51,7 +54,7 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
             var client = _factory.CreateClient();
             client.DefaultRequestHeaders.Add("Accept", "application/javascript");
 
-            var response = await client.GetAsync($"documents/{DocumentsServiceStub.ExistingDocumentId}");
+            var response = await client.GetAsync($"documents/{DocumentsRepositoryStub.ExistingDocumentId}");
 
             response.EnsureSuccessStatusCode();
             Assert.AreEqual("application/json", response.Content.Headers.ContentType.MediaType);
@@ -75,8 +78,8 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
             CollectionAssert.AreEquivalent(
                 new[]
                 {
-                    "Tags collection shouldn't be empty",
-                    "The JsonElement must have at least one property",
+                    DocumentValidationErrors.TagsCollectionShouldNotBeEmpty,
+                    DocumentValidationErrors.JsonElementMustHaveAtLeastOneProperty,
                 },
                 errors);
         }

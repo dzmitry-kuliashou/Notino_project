@@ -7,7 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentValidation" Version="11.11.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
     <PackageReference Include="MessagePack.AspNetCoreMvcFormatter" Version="2.5.171" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
@@ -18,8 +17,7 @@
     <ProjectReference Include="..\Notino_project.Core\Notino_project.Core.csproj" />
     <ProjectReference Include="..\Notino_project.FakeInMemoryRepo\Notino_project.FakeInMemoryRepo.csproj" />
     <ProjectReference Include="..\Notino_project.Repositories.Interfaces\Notino_project.Repositories.Interfaces.csproj" />
-    <ProjectReference Include="..\Notino_project.Services.Interfaces\Notino_project.Services.Interfaces.csproj" />
-    <ProjectReference Include="..\Notino_project.Services\Notino_project.Services.csproj" />
+    <ProjectReference Include="..\Notino_project.Application\Notino_project.Application.csproj" />
   </ItemGroup>
 
 </Project>

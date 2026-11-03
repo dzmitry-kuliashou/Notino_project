@@ -1,6 +1,7 @@
 using FluentValidation.Results;
+using Notino_project.Application.Errors;
+using Notino_project.Application.Validators;
 using Notino_project.Contract.Requests;
-using Notino_project.Validators;
 using System.Text.Json;
 using Xunit;
 
@@ -31,20 +32,26 @@ namespace Notino_project.UnitTests.ModelValidatorTests
 
             var error = Assert.Single(result.Errors);
             Assert.Equal(nameof(UpdateDocumentRequest.Tags), error.PropertyName);
-            Assert.Equal("Tags collection shouldn't be empty", error.ErrorMessage);
+            Assert.Equal(DocumentValidationErrors.TagsCollectionShouldNotBeEmpty, error.ErrorMessage);
         }
 
         [Fact]
         public void Validate_InvalidData_ReturnsValidationErrors()
         {
             var nonObjectResult = ValidateData("42");
-            Assert.Equal("The JsonElement must be an object.", Assert.Single(nonObjectResult.Errors).ErrorMessage);
+            Assert.Equal(
+                DocumentValidationErrors.JsonElementMustBeObject,
+                Assert.Single(nonObjectResult.Errors).ErrorMessage);
 
             var emptyObjectResult = ValidateData("{}");
-            Assert.Equal("The JsonElement must have at least one property", Assert.Single(emptyObjectResult.Errors).ErrorMessage);
+            Assert.Equal(
+                DocumentValidationErrors.JsonElementMustHaveAtLeastOneProperty,
+                Assert.Single(emptyObjectResult.Errors).ErrorMessage);
 
             var nonStringValueResult = ValidateData("""{"optional":42}""");
-            Assert.Equal("The property 'optional' is not a string type.", Assert.Single(nonStringValueResult.Errors).ErrorMessage);
+            Assert.Equal(
+                string.Format(DocumentValidationErrors.JsonPropertyMustBeStringFormat, "optional"),
+                Assert.Single(nonStringValueResult.Errors).ErrorMessage);
         }
 
         private ValidationResult ValidateData(string json)

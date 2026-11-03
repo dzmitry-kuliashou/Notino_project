@@ -1,8 +1,8 @@
-﻿using Notino_project.Contract.Responses;
+using Notino_project.Contract.Responses;
 using Notino_project.Core.Aggregates;
 using System.Text.Json;
 
-namespace Notino_project.Mappers
+namespace Notino_project.Application.Mappers
 {
     public static class DocumentMappers
     {
@@ -14,6 +14,5 @@ namespace Notino_project.Mappers
                 Data = JsonSerializer.Deserialize<Dictionary<string, string>>(document.Data.GetRawText())
                     ?? throw new InvalidOperationException("Document data must be a JSON object."),
             };
-
     }
 }
