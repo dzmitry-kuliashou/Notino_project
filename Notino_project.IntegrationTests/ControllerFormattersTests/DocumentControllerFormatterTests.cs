@@ -2,12 +2,10 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Xunit;
-using Notino_project.ModelBinders;
-using MessagePack.Resolvers;
-using MessagePack;
-using MessagePack.AspNetCoreMvcFormatter;
 using Notino_project.Services.Interfaces.Services.Documents;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Net;
+using System.Net.Http.Json;
 
 namespace Notino_project.IntegrationTests.ControllerFormattersTests
 {
@@ -57,6 +55,30 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
 
             response.EnsureSuccessStatusCode();
             Assert.AreEqual("application/json", response.Content.Headers.ContentType.MediaType);
+        }
+
+        [Fact]
+        public async Task Create_InvalidRequest_ReturnsAllValidationErrors()
+        {
+            var client = _factory.CreateClient();
+            var request = new
+            {
+                Tags = Array.Empty<string>(),
+                Data = new { },
+            };
+
+            var response = await client.PostAsJsonAsync("documents", request);
+
+            Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
+            var errors = await response.Content.ReadFromJsonAsync<string[]>()
+                ?? throw new InvalidOperationException("Expected a JSON string array of validation errors.");
+            CollectionAssert.AreEquivalent(
+                new[]
+                {
+                    "Tags collection shouldn't be empty",
+                    "The JsonElement must have at least one property",
+                },
+                errors);
         }
     }
 }

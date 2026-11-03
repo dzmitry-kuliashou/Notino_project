@@ -8,6 +8,8 @@ using Notino_project.Repositories.Interfaces.Repositories;
 using Notino_project.Services.Interfaces.Services.Documents;
 using Notino_project.Services.Services.Documents;
 using Notino_project.SwaggerFilters;
+using Notino_project.Validators;
+using FluentValidation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +45,7 @@ builder.Services.AddMemoryCache();
 
 builder.Services.AddScoped<IDocumentsService, DocumentsService>();
 builder.Services.AddScoped<IDocumentsRepository, FakeInMemoryDocumentsRepository>();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateDocumentRequestValidator>();
 
 var app = builder.Build();
 

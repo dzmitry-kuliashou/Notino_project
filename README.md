@@ -5,14 +5,11 @@ The Notino_project solution contains the following projects and components:
 
 ## 1. Notino_project
 - `DocumentsController.cs`: This contains the `GetById` (GET), `Create` (POST), and `Update` (PUT) endpoints, which allow for the creation, updating, and retrieval of documents.
-- `DTO Model Classes`: These define the input and output models for creating, updating, and receiving documents via the API.
-- `Create` and `Update` Models: These models have validation attributes for client input data validation:
-  - `Id` is a mandatory `GUID` property.
-  - `Tags` is a mandatory array that must contain at least one `string` member.
-  - `Data` is a mandatory `JsonElement` property, allowing for an arbitrary schema. It must be an object type with at least one property, and only string properties are allowed. Validation rules are defined in the `SimplePropertiesOnlyAttribute` class.
-- `Return Model`: The `Data` field is defined as `Dictionary<string, string>`, allowing it to be serialized into different data formats (JSON, XML, MessagePack). For deserializing `JsonElement` into `Dictionary<string, string>`, a custom `DynamicDataModelBinder` is used.
+- `Notino_project.Contract`: Defines the API-facing `CreateDocumentRequest`, `UpdateDocumentRequest`, and `DocumentResponse` POCOs. Requests contain `Tags` and `JsonElement`-valued `Data`; the response contains `Id`, `Tags`, and dictionary-valued `Data`.
+- `Request validation`: `CreateDocumentRequestValidator` and `UpdateDocumentRequestValidator` in the API project enforce nonempty `Tags` and a nonempty JSON object whose values are strings. The controller invokes these FluentValidation validators explicitly and returns all validation messages as a string array in a `400 Bad Request` response.
+- `Response model`: `DocumentResponse.Data` is a `Dictionary<string, string>`, allowing it to be serialized into JSON, XML, and MessagePack. The API mapper converts the Core aggregate's `JsonElement` data into this dictionary.
 - `API Response Format`: The API allows defining the return data format via the `Accept` request header. It supports JSON (by default), XML, and MessagePack formats. If any other `Accept` header is defined, the API returns data in JSON. New formats can be easily added using formatters in the `Program.cs` file.
-- Mappers: The controller constructs or updates the Core aggregate from validated DTO values, and the API mapper converts it to the response DTO.
+- Mappers: The controller constructs or updates the Core aggregate from validated Contract request values, and the API mapper converts it to `DocumentResponse`.
 ## 2. Notino_project.Core
 - This project contains the `Document` aggregate and shared `AggregateRoot`. The aggregate owns its identity and enforces nonempty tags and nonempty JSON objects containing only string values.
 ## 3. Notino_project.Services.Interfaces
@@ -26,10 +23,10 @@ The Notino_project solution contains the following projects and components:
 ## 7. Notino_project.UnitTests
 - This project contains several XUnit unit tests. While the test coverage is not 100%, different kinds of tests are implemented to cover various areas of the application using various techniques:
   - ControllerTests: These tests check the business logic of controller methods by mocking `DocumentsService` and verifying that controller methods return the expected results in different situations.
-  - ModelValidatorTests: These tests ensure that model validators return the expected error messages for different invalid input model states.
+  - ModelValidatorTests: These tests verify the FluentValidation rules for create and update requests.
   - ServicesTests: These tests check the business logic of the service, specifically the caching logic in `DocumentsService`.
 ## 8. Notino_project.IntegrationTests
-- This project contains integration tests that mock `DocumentsService` and validate that `DocumentsController` returns data in the expected format for different values of the `Accept` request header.
+- This project contains integration tests that mock `DocumentsService`, verify formatter behavior for different `Accept` headers, and verify invalid POST/PUT validation responses.
 
 ## Docker
 Additionally, this solution includes a Dockerfile, allowing the creation of a Docker image to run the application as a Docker container.

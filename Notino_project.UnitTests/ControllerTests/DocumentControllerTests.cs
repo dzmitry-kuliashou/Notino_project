@@ -1,9 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Moq;
 using Notino_project.Controllers;
+using Notino_project.Contract.Responses;
 using Notino_project.Core.Aggregates;
-using Notino_project.Dtos.Document;
 using Notino_project.Services.Interfaces.Services.Documents;
+using Notino_project.Validators;
 using System.Text.Json;
 using Xunit;
 
@@ -16,7 +17,10 @@ namespace Notino_project.UnitTests.ControllerTests
         {
             var mockDocumentsService = new Mock<IDocumentsService>();
 
-            var controller = new DocumentsController(mockDocumentsService.Object);
+            var controller = new DocumentsController(
+                mockDocumentsService.Object,
+                new CreateDocumentRequestValidator(),
+                new UpdateDocumentRequestValidator());
 
             var result = await controller.GetById(Guid.NewGuid());
 
@@ -24,19 +28,22 @@ namespace Notino_project.UnitTests.ControllerTests
         }
 
         [Fact]
-        public async Task GetById_DocumentExists_ReturnsDocumentDto()
+        public async Task GetById_DocumentExists_ReturnsDocumentResponse()
         {
             var id = Guid.NewGuid();
 
             var mockDocumentsService = new Mock<IDocumentsService>();
             mockDocumentsService.Setup(m => m.GetById(id)).ReturnsAsync(GenerateValidDocument(id));
 
-            var controller = new DocumentsController(mockDocumentsService.Object);
+            var controller = new DocumentsController(
+                mockDocumentsService.Object,
+                new CreateDocumentRequestValidator(),
+                new UpdateDocumentRequestValidator());
 
             var result = await controller.GetById(id);
 
             Assert.IsType<OkObjectResult>(result);
-            Assert.IsType<DocumentDto>(((OkObjectResult)result).Value);
+            Assert.IsType<DocumentResponse>(((OkObjectResult)result).Value);
         }
 
         private Document GenerateValidDocument(Guid id)
