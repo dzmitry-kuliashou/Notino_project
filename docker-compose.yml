@@ -1,0 +1,32 @@
+services:
+  mongo:
+    image: mongo:8.0.4
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+      start_period: 5s
+
+  notino_project:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      MongoDb__ConnectionString: ${MONGODB_API_CONNECTION_STRING:-mongodb://mongo:27017}
+      MongoDb__DatabaseName: ${MONGODB_DATABASE_NAME:-notino}
+      MongoDb__CollectionName: ${MONGODB_COLLECTION_NAME:-documents}
+    ports:
+      - "7000:80"
+    profiles:
+      - notino_project
+
+volumes:
+  mongodb-data:

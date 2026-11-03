@@ -7,7 +7,7 @@ COPY Notino_project/Notino_project.csproj ./Notino_project/
 COPY Notino_project.Application/Notino_project.Application.csproj ./Notino_project.Application/
 COPY Notino_project.Contract/Notino_project.Contract.csproj ./Notino_project.Contract/
 COPY Notino_project.Core/Notino_project.Core.csproj ./Notino_project.Core/
-COPY Notino_project.Infrastructure.FakeInMemoryStorage/Notino_project.Infrastructure.FakeInMemoryStorage.csproj ./Notino_project.Infrastructure.FakeInMemoryStorage/
+COPY Notino_project.Infrastructure/Notino_project.Infrastructure.csproj ./Notino_project.Infrastructure/
 
 RUN dotnet restore Notino_project/Notino_project.csproj
 

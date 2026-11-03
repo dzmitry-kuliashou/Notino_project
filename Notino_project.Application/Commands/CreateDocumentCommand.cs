@@ -6,6 +6,7 @@ using Notino_project.Application.Caching;
 using Notino_project.Application.Mappers;
 using Notino_project.Contract.Requests;
 using Notino_project.Core.Aggregates;
+using Notino_project.Core.Exceptions;
 using Notino_project.Core.Repositories;
 
 namespace Notino_project.Application.Commands
@@ -26,7 +27,15 @@ namespace Notino_project.Application.Commands
             }
 
             var document = Document.Construct(command.Request.Tags, command.Request.Data);
-            var created = await repository.Create(document);
+            Document created;
+            try
+            {
+                created = await repository.Create(document);
+            }
+            catch (DocumentAlreadyExistsException)
+            {
+                return new ConflictResult();
+            }
 
             var cacheEntryOptions = new MemoryCacheEntryOptions
             {

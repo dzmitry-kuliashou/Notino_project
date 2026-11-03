@@ -8,6 +8,7 @@ using Notino_project.Application.Validators;
 using Notino_project.Contract.Requests;
 using Notino_project.Contract.Responses;
 using Notino_project.Core.Aggregates;
+using Notino_project.Core.Exceptions;
 using Notino_project.Core.Repositories;
 using System.Text.Json;
 using Xunit;
@@ -42,6 +43,28 @@ namespace Notino_project.UnitTests.ApplicationTests
                 },
                 errors);
             repository.Verify(mock => mock.Create(It.IsAny<Document>()), Times.Never);
+        }
+
+        [Fact]
+        public async Task Create_DuplicateDocument_ReturnsConflict()
+        {
+            var repository = new Mock<IDocumentsWriteRepository>();
+            repository
+                .Setup(mock => mock.Create(It.IsAny<Document>()))
+                .ThrowsAsync(new DocumentAlreadyExistsException(Guid.NewGuid()));
+            var cache = new Mock<IMemoryCache>();
+            var handler = new CreateDocumentCommandHandler(
+                repository.Object,
+                new CreateDocumentRequestValidator(),
+                cache.Object);
+
+            var result = await handler.Handle(
+                new CreateDocumentCommand(CreateValidRequest()),
+                CancellationToken.None);
+
+            Assert.IsType<ConflictResult>(result);
+            repository.Verify(mock => mock.Create(It.IsAny<Document>()), Times.Once);
+            cache.Verify(mock => mock.CreateEntry(It.IsAny<object>()), Times.Never);
         }
 
         [Fact]

@@ -7,6 +7,7 @@ using Notino_project.Application.Errors;
 using Notino_project.Application.Validators;
 using Notino_project.Contract.Requests;
 using Notino_project.Core.Aggregates;
+using Notino_project.Core.Exceptions;
 using Notino_project.Core.Repositories;
 using System.Text.Json;
 using Xunit;
@@ -69,6 +70,36 @@ namespace Notino_project.UnitTests.ApplicationTests
             Assert.IsType<NotFoundResult>(result);
             readRepository.Verify(mock => mock.GetById(id), Times.Once);
             writeRepository.Verify(mock => mock.Update(It.IsAny<Document>()), Times.Never);
+            Assert.False(cache.TryGetValue(DocumentCacheKeys.For(id), out _));
+        }
+
+        [Fact]
+        public async Task Update_RepositoryReportsMissingDocument_ReturnsNotFoundAndRemovesCachedDocument()
+        {
+            var id = Guid.NewGuid();
+            using var initialJson = JsonDocument.Parse("""{"name":"old"}""");
+            var existing = Document.Construct(["old"], initialJson.RootElement.Clone());
+            existing.Id = id;
+            var readRepository = new Mock<IDocumentsReadRepository>();
+            readRepository.Setup(mock => mock.GetById(id)).ReturnsAsync(existing);
+            var writeRepository = new Mock<IDocumentsWriteRepository>();
+            writeRepository
+                .Setup(mock => mock.Update(It.IsAny<Document>()))
+                .ThrowsAsync(new DocumentNotFoundException(id));
+            using var cache = new MemoryCache(new MemoryCacheOptions());
+            var handler = new UpdateDocumentCommandHandler(
+                readRepository.Object,
+                writeRepository.Object,
+                new UpdateDocumentRequestValidator(),
+                cache);
+
+            var result = await handler.Handle(
+                new UpdateDocumentCommand(id, CreateValidRequest()),
+                CancellationToken.None);
+
+            Assert.IsType<NotFoundResult>(result);
+            readRepository.Verify(mock => mock.GetById(id), Times.Once);
+            writeRepository.Verify(mock => mock.Update(It.Is<Document>(document => document.Id == id)), Times.Once);
             Assert.False(cache.TryGetValue(DocumentCacheKeys.For(id), out _));
         }
 

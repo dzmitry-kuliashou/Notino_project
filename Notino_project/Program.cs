@@ -4,11 +4,12 @@ using MessagePack.Resolvers;
 using Microsoft.OpenApi.Models;
 using Notino_project.Application.Queries;
 using Notino_project.Application.Validators;
-using Notino_project.Core.Repositories;
-using Notino_project.Infrastructure.FakeInMemoryStorage.Repositories;
+using Notino_project.Infrastructure;
+using Notino_project.Infrastructure.Repositories;
 using Notino_project.ModelBinders;
 using Notino_project.SwaggerFilters;
 using FluentValidation;
+using MongoDocument = Notino_project.Infrastructure.StorageModels.Document;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -42,8 +43,12 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddMemoryCache();
 
-builder.Services.AddScoped<IDocumentsReadRepository, FakeInMemoryDocumentsReadRepository>();
-builder.Services.AddScoped<IDocumentsWriteRepository, FakeInMemoryDocumentsWriteRepository>();
+var mongoSettings = builder.Configuration
+    .GetSection(MongoDbSettings.SectionName)
+    .Get<MongoDbSettings>()
+    ?? throw new InvalidOperationException("MongoDB settings are missing.");
+builder.Services.AddMongoDb<MongoDocument, DocumentsReadRepository, DocumentsWriteRepository>(mongoSettings);
+
 builder.Services.AddMediatR(configuration =>
     configuration.RegisterServicesFromAssembly(typeof(GetByIdQuery).Assembly));
 builder.Services.AddValidatorsFromAssembly(typeof(CreateDocumentRequestValidator).Assembly);

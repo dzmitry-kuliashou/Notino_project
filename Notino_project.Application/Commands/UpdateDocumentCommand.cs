@@ -6,6 +6,7 @@ using Notino_project.Application.Caching;
 using Notino_project.Application.Mappers;
 using Notino_project.Contract.Requests;
 using Notino_project.Core.Aggregates;
+using Notino_project.Core.Exceptions;
 using Notino_project.Core.Repositories;
 
 namespace Notino_project.Application.Commands
@@ -43,7 +44,17 @@ namespace Notino_project.Application.Commands
             }
 
             existing.Update(command.Request.Tags, command.Request.Data);
-            var updated = await writeRepository.Update(existing);
+            Document updated;
+            try
+            {
+                updated = await writeRepository.Update(existing);
+            }
+            catch (DocumentNotFoundException)
+            {
+                cache.Remove(cacheKey);
+                return new NotFoundResult();
+            }
+
             cache.Set(cacheKey, updated, CreateCacheEntryOptions());
 
             return new OkObjectResult(updated.ToResponse());
