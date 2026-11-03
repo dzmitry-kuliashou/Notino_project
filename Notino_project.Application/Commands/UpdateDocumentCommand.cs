@@ -49,7 +49,7 @@ namespace Notino_project.Application.Commands
             {
                 updated = await writeRepository.Update(existing);
             }
-            catch (DocumentNotFoundException)
+            catch (AggregateNotFoundException)
             {
                 cache.Remove(cacheKey);
                 return new NotFoundResult();

@@ -32,7 +32,7 @@ namespace Notino_project.Application.Commands
             {
                 created = await repository.Create(document);
             }
-            catch (DocumentAlreadyExistsException)
+            catch (AggregateAlreadyExistsException)
             {
                 return new ConflictResult();
             }

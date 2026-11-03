@@ -31,7 +31,7 @@ namespace Notino_project.Application.Commands
             {
                 await writeRepository.Update(document);
             }
-            catch (DocumentNotFoundException)
+            catch (AggregateNotFoundException)
             {
                 cache.Remove(cacheKey);
                 return new NotFoundResult();

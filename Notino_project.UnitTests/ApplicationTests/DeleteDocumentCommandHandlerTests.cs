@@ -81,7 +81,7 @@ namespace Notino_project.UnitTests.ApplicationTests
             _readRepository.Setup(mock => mock.GetById(id)).ReturnsAsync(existing);
             _writeRepository
                 .Setup(mock => mock.Update(It.IsAny<Document>()))
-                .ThrowsAsync(new DocumentNotFoundException(id));
+                .ThrowsAsync(new AggregateNotFoundException(id));
             _cache.Set(DocumentCacheKeys.For(id), existing);
 
             var result = await _handler.Handle(

@@ -51,7 +51,7 @@ namespace Notino_project.UnitTests.ApplicationTests
             var repository = new Mock<IDocumentsWriteRepository>();
             repository
                 .Setup(mock => mock.Create(It.IsAny<Document>()))
-                .ThrowsAsync(new DocumentAlreadyExistsException(Guid.NewGuid()));
+                .ThrowsAsync(new AggregateAlreadyExistsException(Guid.NewGuid()));
             var cache = new Mock<IMemoryCache>();
             var handler = new CreateDocumentCommandHandler(
                 repository.Object,

@@ -151,7 +151,7 @@ namespace Notino_project.IntegrationTests
         }
 
         [Fact]
-        public async Task Update_DeletedDocument_ThrowsDocumentNotFoundException()
+        public async Task Update_DeletedDocument_ThrowsAggregateNotFoundException()
         {
             using var jsonDocument = JsonDocument.Parse("""{"name":"deleted"}""");
             var document = Document.Construct(["deleted"], jsonDocument.RootElement.Clone());
@@ -161,7 +161,7 @@ namespace Notino_project.IntegrationTests
             document.Delete();
             await _writeRepository.Update(document);
 
-            await Assert.ThrowsExceptionAsync<DocumentNotFoundException>(
+            await Assert.ThrowsExceptionAsync<AggregateNotFoundException>(
                 () => _writeRepository.Update(document));
         }
 
@@ -187,25 +187,25 @@ namespace Notino_project.IntegrationTests
         }
 
         [Fact]
-        public async Task Create_DuplicateId_ThrowsDocumentAlreadyExistsException()
+        public async Task Create_DuplicateId_ThrowsAggregateAlreadyExistsException()
         {
             using var jsonDocument = JsonDocument.Parse("""{"name":"duplicate"}""");
             var document = Document.Construct(["duplicate"], jsonDocument.RootElement.Clone());
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
 
-            await Assert.ThrowsExceptionAsync<DocumentAlreadyExistsException>(
+            await Assert.ThrowsExceptionAsync<AggregateAlreadyExistsException>(
                 () => _writeRepository.Create(document));
         }
 
         [Fact]
-        public async Task Update_MissingDocument_ThrowsDocumentNotFoundException()
+        public async Task Update_MissingDocument_ThrowsAggregateNotFoundException()
         {
             using var jsonDocument = JsonDocument.Parse("""{"name":"missing"}""");
             var document = Document.Construct(["missing"], jsonDocument.RootElement.Clone());
             document.Id = Guid.NewGuid();
 
-            await Assert.ThrowsExceptionAsync<DocumentNotFoundException>(
+            await Assert.ThrowsExceptionAsync<AggregateNotFoundException>(
                 () => _writeRepository.Update(document));
 
             Assert.IsNull(await _readRepository.GetById(document.Id));

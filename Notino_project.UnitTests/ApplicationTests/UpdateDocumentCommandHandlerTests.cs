@@ -85,7 +85,7 @@ namespace Notino_project.UnitTests.ApplicationTests
             var writeRepository = new Mock<IDocumentsWriteRepository>();
             writeRepository
                 .Setup(mock => mock.Update(It.IsAny<Document>()))
-                .ThrowsAsync(new DocumentNotFoundException(id));
+                .ThrowsAsync(new AggregateNotFoundException(id));
             using var cache = new MemoryCache(new MemoryCacheOptions());
             var handler = new UpdateDocumentCommandHandler(
                 readRepository.Object,
