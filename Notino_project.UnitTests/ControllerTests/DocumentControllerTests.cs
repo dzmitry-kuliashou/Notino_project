@@ -13,6 +13,28 @@ namespace Notino_project.UnitTests.ControllerTests
     public class DocumentControllerTests
     {
         [Fact]
+        public async Task List_DispatchesQueryAndReturnsHandlerResult()
+        {
+            var parameters = new ListParams { Page = "2", PageSize = "7" };
+            var handlerResult = new OkObjectResult(new DocumentsResponse());
+            var sender = new Mock<ISender>();
+            sender.Setup(mock => mock.Send(It.IsAny<ListDocumentsQuery>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(handlerResult);
+            var controller = new DocumentController(sender.Object);
+
+            var result = await controller.List(parameters);
+
+            Assert.Same(handlerResult, result);
+            sender.Verify(
+                mock => mock.Send(
+                    It.Is<ListDocumentsQuery>(query =>
+                        query.Parameters.Page == parameters.Page &&
+                        query.Parameters.PageSize == parameters.PageSize),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
+
+        [Fact]
         public async Task GetById_DispatchesQueryAndReturnsHandlerResult()
         {
             var id = Guid.NewGuid();

@@ -41,9 +41,33 @@ namespace Notino_project.IntegrationTests
 
         public DocumentsRepositoryTests(MongoDatabaseFixture fixture)
         {
-            var collection = fixture.Database.GetCollection<MongoDocument>("documents");
+            var collection = fixture.Database.GetCollection<MongoDocument>(
+                $"documents_{Guid.NewGuid():N}");
             _readRepository = new DocumentsReadRepository(collection);
             _writeRepository = new DocumentsWriteRepository(collection);
+        }
+
+        [Fact]
+        public async Task List_ReturnsAscendingPageAndExactCount()
+        {
+            var ids = Enumerable.Range(1, 5)
+                .Select(index => Guid.Parse($"00000000-0000-0000-0000-{index:000000000000}"))
+                .ToArray();
+            using var jsonDocument = JsonDocument.Parse("""{"name":"paging"}""");
+
+            foreach (var id in ids.Reverse())
+            {
+                var document = Document.Construct(["paging"], jsonDocument.RootElement.Clone());
+                document.Id = id;
+                await _writeRepository.Create(document);
+            }
+
+            var (documents, totalCount) = await _readRepository.List(1, 2);
+
+            Assert.AreEqual(5L, totalCount);
+            CollectionAssert.AreEqual(
+                ids.Skip(2).Take(2).ToArray(),
+                documents.Select(document => document.Id).ToArray());
         }
 
         [Fact]

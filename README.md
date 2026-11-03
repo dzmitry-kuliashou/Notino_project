@@ -6,7 +6,7 @@ The solution is a .NET 8 document API. The API controller dispatches document op
 
 ## Projects
 
-- **Notino_project** — ASP.NET Core API. `DocumentController` exposes `GET /documents/{id}`, `POST /documents`, and `PUT /documents/{id}` and forwards requests through `ISender`. `Program.cs` registers the Application handlers and validators, memory cache, and MongoDB-backed read and write repositories. Responses support JSON, XML, and MessagePack; JSON is used when the requested `Accept` format is unsupported.
+- **Notino_project** — ASP.NET Core API. `DocumentController` exposes the paginated `GET /documents` collection route, `GET /documents/{id}`, `POST /documents`, and `PUT /documents/{id}` and forwards requests through `ISender`. `Program.cs` registers the Application handlers and validators, memory cache, and MongoDB-backed read and write repositories. Responses support JSON, XML, and MessagePack; JSON is used when the requested `Accept` format is unsupported.
 - **Notino_project.Application** — MediatR query and command handlers, FluentValidation request validators, response mapper, validation messages, and shared cache key and expiration policy.
 - **Notino_project.Contract** — API request and response models. `DocumentResponse.Data` is a string dictionary, while request data uses `JsonElement`.
 - **Notino_project.Core** — `Document` aggregate, shared `AggregateRoot`, and the `IDocumentsReadRepository` / `IDocumentsWriteRepository` contracts. The aggregate enforces its tag and JSON-data invariants.
@@ -16,9 +16,21 @@ The solution is a .NET 8 document API. The API controller dispatches document op
 
 ## Application behavior
 
-The get-by-id handler returns NotFound for missing documents and caches successful reads. Create and update handlers validate requests before repository operations and preserve the API response shapes. All handlers use the `documents_<id>` cache key with five-minute absolute and two-minute sliding expiration.
+The get-by-id handler returns NotFound for missing documents and caches successful reads. The list handler returns a paginated document response and does not cache list results. Create and update handlers validate requests before repository operations and preserve the API response shapes. The get-by-id handler uses the `documents_<id>` cache key with five-minute absolute and two-minute sliding expiration.
 
 The validators and response mapper live in Application. Validation messages are shared constants so unit and integration tests verify the same API-visible text.
+
+## List documents
+
+`GET /documents` returns a `DocumentsResponse` containing `items`, `totalPageCount`, `currentPage`, `pageSize`, `hasPrevious`, and `hasNext`.
+
+Use the optional query parameters `p` (zero-based page index, default `0`) and `ps` (page size, default `10`), for example:
+
+```powershell
+Invoke-RestMethod -Uri "http://localhost:8080/documents?p=0&ps=10"
+```
+
+Malformed or negative `p` values use page `0`; malformed or non-positive `ps` values use page size `10`. If the page offset would overflow, the page index is clamped to the largest safe index for the selected page size. Results are ordered by document ID ascending. The repository uses an exact document count to calculate `totalPageCount`; the response does not expose a total item count. A valid page beyond the last page returns HTTP 200 with an empty `items` array and the requested page metadata.
 
 ## Build and test
 

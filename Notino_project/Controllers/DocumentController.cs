@@ -10,6 +10,10 @@ namespace Notino_project.Controllers
     [Route("/documents")]
     public class DocumentController(ISender sender) : Controller
     {
+        [HttpGet]
+        public async Task<IActionResult> List([FromQuery] ListParams parameters) =>
+            await sender.Send(new ListDocumentsQuery(parameters));
+
         [HttpGet("{id:Guid}")]
         public async Task<IActionResult> GetById([FromRoute] Guid id) =>
             await sender.Send(new GetByIdQuery(id));
