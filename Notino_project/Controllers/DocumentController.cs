@@ -22,6 +22,10 @@ namespace Notino_project.Controllers
         public async Task<IActionResult> Create([FromBody] CreateDocumentRequest createDocumentModel) =>
             await sender.Send(new CreateDocumentCommand(createDocumentModel));
 
+        [HttpDelete("{id:Guid}")]
+        public async Task<IActionResult> Delete([FromRoute] Guid id) =>
+            await sender.Send(new DeleteDocumentCommand(id));
+
         [HttpPut("{id:Guid}")]
         public async Task<IActionResult> Update(
             [FromRoute] Guid id,

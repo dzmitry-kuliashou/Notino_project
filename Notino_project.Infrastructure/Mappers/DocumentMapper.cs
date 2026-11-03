@@ -10,6 +10,11 @@ public static class DocumentMapper
     {
         var document = Document.Construct(model.Tags, JsonSerializer.SerializeToElement(model.Data));
         document.Id = model.Id;
+        if (model.IsDeleted)
+        {
+            document.Delete();
+        }
+
         return document;
     }
 
@@ -32,6 +37,7 @@ public static class DocumentMapper
             Id = document.Id,
             Tags = document.Tags.ToList(),
             Data = data,
+            IsDeleted = document.IsDeleted,
         };
     }
 }

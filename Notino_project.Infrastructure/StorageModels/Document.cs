@@ -14,5 +14,7 @@ namespace Notino_project.Infrastructure.StorageModels
 
         [BsonDictionaryOptions(DictionaryRepresentation.Document)]
         public Dictionary<string, string> Data { get; set; } = new();
+
+        public bool IsDeleted { get; set; }
     }
 }

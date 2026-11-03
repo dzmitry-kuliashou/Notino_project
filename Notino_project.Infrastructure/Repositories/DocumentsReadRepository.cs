@@ -11,8 +11,11 @@ public sealed class DocumentsReadRepository(IMongoCollection<MongoDocument> coll
 {
     public async Task<Core.Aggregates.Document?> GetById(Guid id)
     {
+        var filter = Builders<MongoDocument>.Filter.And(
+            Builders<MongoDocument>.Filter.Eq(document => document.Id, id),
+            Builders<MongoDocument>.Filter.Ne(document => document.IsDeleted, true));
         var document = await collection
-            .Find(storedDocument => storedDocument.Id == id)
+            .Find(filter)
             .FirstOrDefaultAsync();
 
         return document?.ToCore();
@@ -20,7 +23,7 @@ public sealed class DocumentsReadRepository(IMongoCollection<MongoDocument> coll
 
     public async Task<(IReadOnlyList<CoreDocument> Documents, long TotalCount)> List(int page, int pageSize)
     {
-        var filter = Builders<MongoDocument>.Filter.Empty;
+        var filter = Builders<MongoDocument>.Filter.Ne(document => document.IsDeleted, true);
         var totalCount = await collection.CountDocumentsAsync(filter);
         var documents = await collection
             .Find(filter)

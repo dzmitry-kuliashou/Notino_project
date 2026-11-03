@@ -111,5 +111,25 @@ namespace Notino_project.UnitTests.ControllerTests
                     It.IsAny<CancellationToken>()),
                 Times.Once);
         }
+
+        [Fact]
+        public async Task Delete_DispatchesCommandAndReturnsHandlerResult()
+        {
+            var id = Guid.NewGuid();
+            var handlerResult = new NoContentResult();
+            var sender = new Mock<ISender>();
+            sender.Setup(mock => mock.Send(It.IsAny<DeleteDocumentCommand>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(handlerResult);
+            var controller = new DocumentController(sender.Object);
+
+            var result = await controller.Delete(id);
+
+            Assert.Same(handlerResult, result);
+            sender.Verify(
+                mock => mock.Send(
+                    It.Is<DeleteDocumentCommand>(command => command.Id == id),
+                    It.IsAny<CancellationToken>()),
+                Times.Once);
+        }
     }
 }

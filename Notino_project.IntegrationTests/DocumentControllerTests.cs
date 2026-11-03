@@ -1,6 +1,7 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Notino_project.Application.Errors;
 using Notino_project.Contract.Responses;
+using Notino_project.IntegrationTests.ControllerFormattersTests;
 using System.Net;
 using System.Net.Http.Json;
 using Xunit;
@@ -60,5 +61,25 @@ public sealed class DocumentControllerTests(CustomWebApplicationFactory factory)
                 DocumentValidationErrors.JsonElementMustHaveAtLeastOneProperty,
             },
             errors);
+    }
+
+    [Fact]
+    public async Task Delete_ExistingDocument_ReturnsNoContent()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.DeleteAsync($"documents/{DocumentsRepositoryStub.ExistingDocumentId}");
+
+        Assert.AreEqual(HttpStatusCode.NoContent, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Delete_UnknownDocument_ReturnsNotFound()
+    {
+        var client = factory.CreateClient();
+
+        var response = await client.DeleteAsync($"documents/{Guid.NewGuid()}");
+
+        Assert.AreEqual(HttpStatusCode.NotFound, response.StatusCode);
     }
 }

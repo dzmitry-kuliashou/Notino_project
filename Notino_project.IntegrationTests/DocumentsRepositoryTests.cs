@@ -36,15 +36,16 @@ namespace Notino_project.IntegrationTests
 
     public sealed class DocumentsRepositoryTests : IClassFixture<MongoDatabaseFixture>
     {
+        private readonly IMongoCollection<MongoDocument> _collection;
         private readonly DocumentsReadRepository _readRepository;
         private readonly DocumentsWriteRepository _writeRepository;
 
         public DocumentsRepositoryTests(MongoDatabaseFixture fixture)
         {
-            var collection = fixture.Database.GetCollection<MongoDocument>(
+            _collection = fixture.Database.GetCollection<MongoDocument>(
                 $"documents_{Guid.NewGuid():N}");
-            _readRepository = new DocumentsReadRepository(collection);
-            _writeRepository = new DocumentsWriteRepository(collection);
+            _readRepository = new DocumentsReadRepository(_collection);
+            _writeRepository = new DocumentsWriteRepository(_collection);
         }
 
         [Fact]
@@ -87,6 +88,81 @@ namespace Notino_project.IntegrationTests
             CollectionAssert.AreEqual(new[] { "skincare", "daily" }, result.Tags.ToArray());
             Assert.AreEqual("item", result.Data.GetProperty("name").GetString());
             Assert.AreEqual("care", result.Data.GetProperty("category").GetString());
+        }
+
+        [Fact]
+        public async Task GetByIdAndList_LegacyDocumentWithoutDeletionFlag_TreatsItAsActive()
+        {
+            using var jsonDocument = JsonDocument.Parse("""{"name":"legacy"}""");
+            var document = Document.Construct(["legacy"], jsonDocument.RootElement.Clone());
+            document.Id = Guid.NewGuid();
+            await _writeRepository.Create(document);
+            await _collection.UpdateOneAsync(
+                storedDocument => storedDocument.Id == document.Id,
+                Builders<MongoDocument>.Update.Unset(storedDocument => storedDocument.IsDeleted));
+
+            var result = await _readRepository.GetById(document.Id);
+            var (documents, totalCount) = await _readRepository.List(0, 10);
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(document.Id, result.Id);
+            Assert.AreEqual(1L, totalCount);
+            CollectionAssert.AreEqual(new[] { document.Id }, documents.Select(item => item.Id).ToArray());
+        }
+
+        [Fact]
+        public async Task GetById_DeletedDocument_ReturnsNull()
+        {
+            using var jsonDocument = JsonDocument.Parse("""{"name":"deleted"}""");
+            var document = Document.Construct(["deleted"], jsonDocument.RootElement.Clone());
+            document.Id = Guid.NewGuid();
+            await _writeRepository.Create(document);
+
+            document.Delete();
+            await _writeRepository.Update(document);
+
+            Assert.IsNull(await _readRepository.GetById(document.Id));
+        }
+
+        [Fact]
+        public async Task List_DeletedDocument_ExcludesItFromPageAndCount()
+        {
+            using var jsonDocument = JsonDocument.Parse("""{"name":"list"}""");
+            var activeIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
+            foreach (var id in activeIds.Append(Guid.NewGuid()))
+            {
+                var document = Document.Construct(["list"], jsonDocument.RootElement.Clone());
+                document.Id = id;
+                await _writeRepository.Create(document);
+
+                if (!activeIds.Contains(id))
+                {
+                    document.Delete();
+                    await _writeRepository.Update(document);
+                }
+            }
+
+            var (documents, totalCount) = await _readRepository.List(0, 10);
+
+            Assert.AreEqual(2L, totalCount);
+            CollectionAssert.AreEqual(
+                activeIds.OrderBy(id => id).ToArray(),
+                documents.Select(document => document.Id).ToArray());
+        }
+
+        [Fact]
+        public async Task Update_DeletedDocument_ThrowsDocumentNotFoundException()
+        {
+            using var jsonDocument = JsonDocument.Parse("""{"name":"deleted"}""");
+            var document = Document.Construct(["deleted"], jsonDocument.RootElement.Clone());
+            document.Id = Guid.NewGuid();
+            await _writeRepository.Create(document);
+
+            document.Delete();
+            await _writeRepository.Update(document);
+
+            await Assert.ThrowsExceptionAsync<DocumentNotFoundException>(
+                () => _writeRepository.Update(document));
         }
 
         [Fact]

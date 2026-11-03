@@ -27,8 +27,11 @@ public sealed class DocumentsWriteRepository(IMongoCollection<MongoDocument> col
 
     public async Task<Document> Update(Document document)
     {
+        var filter = Builders<MongoDocument>.Filter.And(
+            Builders<MongoDocument>.Filter.Eq(storedDocument => storedDocument.Id, document.Id),
+            Builders<MongoDocument>.Filter.Ne(storedDocument => storedDocument.IsDeleted, true));
         var result = await collection.ReplaceOneAsync(
-            storedDocument => storedDocument.Id == document.Id,
+            filter,
             document.ToMongoModel(),
             new ReplaceOptions { IsUpsert = false });
 

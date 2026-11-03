@@ -25,6 +25,19 @@ namespace Notino_project.UnitTests.AggregateTests
             Assert.NotEqual(Guid.Empty, document.Id);
             Assert.Equal(tags, document.Tags);
             Assert.Equal("value", document.Data.GetProperty("name").GetString());
+            Assert.False(document.IsDeleted);
+        }
+
+        [Fact]
+        public void Delete_ActiveDocument_MarksItDeleted()
+        {
+            var document = Document.Construct(ValidTags(), ValidData());
+
+            Assert.False(document.IsDeleted);
+
+            document.Delete();
+
+            Assert.True(document.IsDeleted);
         }
 
         [Fact]

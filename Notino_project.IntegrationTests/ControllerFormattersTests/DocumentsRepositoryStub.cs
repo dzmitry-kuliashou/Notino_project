@@ -28,6 +28,6 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
             Task.FromException<Document>(new NotImplementedException());
 
         public Task<Document> Update(Document document) =>
-            Task.FromException<Document>(new NotImplementedException());
+            Task.FromResult(document);
     }
 }
