@@ -5,7 +5,6 @@ using Notino_project.Contract.Requests;
 using Notino_project.Contract.Responses;
 using Notino_project.Core.Aggregates;
 using Notino_project.Core.Repositories;
-using System.Text.Json;
 using Xunit;
 
 namespace Notino_project.UnitTests.ApplicationTests
@@ -101,9 +100,9 @@ namespace Notino_project.UnitTests.ApplicationTests
 
         private static Document CreateDocument(Guid id, string name)
         {
-            using var jsonDocument = JsonDocument.Parse(
-                JsonSerializer.Serialize(new Dictionary<string, string> { ["name"] = name }));
-            var document = Document.Construct(["test"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["test"],
+                new Dictionary<string, string> { ["name"] = name });
             document.Id = id;
             return document;
         }

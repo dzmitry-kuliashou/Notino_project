@@ -58,9 +58,24 @@ public sealed class DocumentControllerTests(CustomWebApplicationFactory factory)
             new[]
             {
                 DocumentValidationErrors.TagsCollectionShouldNotBeEmpty,
-                DocumentValidationErrors.JsonElementMustHaveAtLeastOneProperty,
+                DocumentValidationErrors.DataMustHaveAtLeastOneProperty,
             },
             errors);
+    }
+
+    [Fact]
+    public async Task Create_DataContainsNonStringValue_ReturnsBadRequest()
+    {
+        var client = factory.CreateClient();
+        var request = new
+        {
+            Tags = new[] { "a" },
+            Data = new { value = 42 },
+        };
+
+        var response = await client.PostAsJsonAsync("documents", request);
+
+        Assert.AreEqual(HttpStatusCode.BadRequest, response.StatusCode);
     }
 
     [Fact]

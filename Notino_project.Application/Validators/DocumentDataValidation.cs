@@ -1,33 +1,30 @@
 using Notino_project.Application.Errors;
-using System.Text.Json;
 
 namespace Notino_project.Application.Validators
 {
     internal static class DocumentDataValidation
     {
-        public static void Validate(JsonElement data, Action<string> addFailure)
+        public static void Validate(Dictionary<string, string>? data, Action<string> addFailure)
         {
-            if (data.ValueKind != JsonValueKind.Object)
+            if (data is null)
             {
-                addFailure(DocumentValidationErrors.JsonElementMustBeObject);
+                addFailure(DocumentValidationErrors.DataMustNotBeNull);
                 return;
             }
 
-            var hasProperties = false;
-            foreach (var property in data.EnumerateObject())
+            if (data.Count == 0)
             {
-                hasProperties = true;
-                if (property.Value.ValueKind != JsonValueKind.String)
-                {
-                    addFailure(string.Format(
-                        DocumentValidationErrors.JsonPropertyMustBeStringFormat,
-                        property.Name));
-                }
+                addFailure(DocumentValidationErrors.DataMustHaveAtLeastOneProperty);
             }
 
-            if (!hasProperties)
+            foreach (var (key, value) in data)
             {
-                addFailure(DocumentValidationErrors.JsonElementMustHaveAtLeastOneProperty);
+                if (value is null)
+                {
+                    addFailure(string.Format(
+                        DocumentValidationErrors.DataPropertyMustBeStringFormat,
+                        key));
+                }
             }
         }
     }

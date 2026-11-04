@@ -1,6 +1,5 @@
 using Notino_project.Core.Aggregates;
 using Notino_project.Core.Repositories;
-using System.Text.Json;
 
 namespace Notino_project.IntegrationTests.ControllerFormattersTests
 {
@@ -15,8 +14,9 @@ namespace Notino_project.IntegrationTests.ControllerFormattersTests
                 return Task.FromResult<Document?>(null);
             }
 
-            using var jsonDocument = JsonDocument.Parse("""{"something":"This is data"}""");
-            var document = Document.Construct(["a"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["a"],
+                new Dictionary<string, string> { ["something"] = "This is data" });
             document.Id = id;
             return Task.FromResult<Document?>(document);
         }

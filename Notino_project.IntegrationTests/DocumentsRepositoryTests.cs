@@ -3,7 +3,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Notino_project.Core.Aggregates;
 using Notino_project.Core.Exceptions;
 using Notino_project.Infrastructure.Repositories;
-using System.Text.Json;
 using Testcontainers.MongoDb;
 using Xunit;
 using MongoDocument = Notino_project.Infrastructure.StorageModels.Document;
@@ -54,11 +53,11 @@ namespace Notino_project.IntegrationTests
             var ids = Enumerable.Range(1, 5)
                 .Select(index => Guid.Parse($"00000000-0000-0000-0000-{index:000000000000}"))
                 .ToArray();
-            using var jsonDocument = JsonDocument.Parse("""{"name":"paging"}""");
+            var data = new Dictionary<string, string> { ["name"] = "paging" };
 
             foreach (var id in ids.Reverse())
             {
-                var document = Document.Construct(["paging"], jsonDocument.RootElement.Clone());
+                var document = Document.Construct(["paging"], data);
                 document.Id = id;
                 await _writeRepository.Create(document);
             }
@@ -74,10 +73,13 @@ namespace Notino_project.IntegrationTests
         [Fact]
         public async Task Create_GetById_PreservesGuidTagsAndData()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"item","category":"care"}""");
             var document = Document.Construct(
                 ["skincare", "daily"],
-                jsonDocument.RootElement.Clone());
+                new Dictionary<string, string>
+                {
+                    ["name"] = "item",
+                    ["category"] = "care",
+                });
             document.Id = Guid.NewGuid();
 
             await _writeRepository.Create(document);
@@ -86,15 +88,16 @@ namespace Notino_project.IntegrationTests
             Assert.IsNotNull(result);
             Assert.AreEqual(document.Id, result.Id);
             CollectionAssert.AreEqual(new[] { "skincare", "daily" }, result.Tags.ToArray());
-            Assert.AreEqual("item", result.Data.GetProperty("name").GetString());
-            Assert.AreEqual("care", result.Data.GetProperty("category").GetString());
+            Assert.AreEqual("item", result.Data["name"]);
+            Assert.AreEqual("care", result.Data["category"]);
         }
 
         [Fact]
         public async Task GetByIdAndList_LegacyDocumentWithoutDeletionFlag_TreatsItAsActive()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"legacy"}""");
-            var document = Document.Construct(["legacy"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["legacy"],
+                new Dictionary<string, string> { ["name"] = "legacy" });
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
             await _collection.UpdateOneAsync(
@@ -113,8 +116,9 @@ namespace Notino_project.IntegrationTests
         [Fact]
         public async Task GetById_DeletedDocument_ReturnsNull()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"deleted"}""");
-            var document = Document.Construct(["deleted"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["deleted"],
+                new Dictionary<string, string> { ["name"] = "deleted" });
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
 
@@ -126,11 +130,11 @@ namespace Notino_project.IntegrationTests
         [Fact]
         public async Task List_DeletedDocument_ExcludesItFromPageAndCount()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"list"}""");
+            var data = new Dictionary<string, string> { ["name"] = "list" };
             var activeIds = new[] { Guid.NewGuid(), Guid.NewGuid() };
             foreach (var id in activeIds.Append(Guid.NewGuid()))
             {
-                var document = Document.Construct(["list"], jsonDocument.RootElement.Clone());
+                var document = Document.Construct(["list"], data);
                 document.Id = id;
                 await _writeRepository.Create(document);
 
@@ -151,8 +155,9 @@ namespace Notino_project.IntegrationTests
         [Fact]
         public async Task Update_DeletedDocument_ThrowsAggregateNotFoundException()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"deleted"}""");
-            var document = Document.Construct(["deleted"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["deleted"],
+                new Dictionary<string, string> { ["name"] = "deleted" });
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
 
@@ -165,13 +170,19 @@ namespace Notino_project.IntegrationTests
         [Fact]
         public async Task Update_ExistingDocument_PersistsChangedFields()
         {
-            using var initialJson = JsonDocument.Parse("""{"name":"old"}""");
-            var document = Document.Construct(["old"], initialJson.RootElement.Clone());
+            var document = Document.Construct(
+                ["old"],
+                new Dictionary<string, string> { ["name"] = "old" });
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
 
-            using var updatedJson = JsonDocument.Parse("""{"name":"new","status":"active"}""");
-            document.Update(["new", "updated"], updatedJson.RootElement.Clone());
+            document.Update(
+                ["new", "updated"],
+                new Dictionary<string, string>
+                {
+                    ["name"] = "new",
+                    ["status"] = "active",
+                });
             await _writeRepository.Update(document);
 
             var result = await _readRepository.GetById(document.Id);
@@ -179,15 +190,16 @@ namespace Notino_project.IntegrationTests
             Assert.IsNotNull(result);
             Assert.AreEqual(document.Id, result.Id);
             CollectionAssert.AreEqual(new[] { "new", "updated" }, result.Tags.ToArray());
-            Assert.AreEqual("new", result.Data.GetProperty("name").GetString());
-            Assert.AreEqual("active", result.Data.GetProperty("status").GetString());
+            Assert.AreEqual("new", result.Data["name"]);
+            Assert.AreEqual("active", result.Data["status"]);
         }
 
         [Fact]
         public async Task Create_DuplicateId_ThrowsAggregateAlreadyExistsException()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"duplicate"}""");
-            var document = Document.Construct(["duplicate"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["duplicate"],
+                new Dictionary<string, string> { ["name"] = "duplicate" });
             document.Id = Guid.NewGuid();
             await _writeRepository.Create(document);
 
@@ -198,8 +210,9 @@ namespace Notino_project.IntegrationTests
         [Fact]
         public async Task Update_MissingDocument_ThrowsAggregateNotFoundException()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"missing"}""");
-            var document = Document.Construct(["missing"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["missing"],
+                new Dictionary<string, string> { ["name"] = "missing" });
             document.Id = Guid.NewGuid();
 
             await Assert.ThrowsExceptionAsync<AggregateNotFoundException>(
@@ -211,8 +224,9 @@ namespace Notino_project.IntegrationTests
         [Fact]
         public async Task Delete_MissingDocument_ThrowsAggregateNotFoundException()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"missing"}""");
-            var document = Document.Construct(["missing"], jsonDocument.RootElement.Clone());
+            var document = Document.Construct(
+                ["missing"],
+                new Dictionary<string, string> { ["name"] = "missing" });
             document.Id = Guid.NewGuid();
 
             await Assert.ThrowsExceptionAsync<AggregateNotFoundException>(

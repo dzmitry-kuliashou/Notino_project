@@ -9,7 +9,6 @@ using Notino_project.Contract.Requests;
 using Notino_project.Core.Aggregates;
 using Notino_project.Core.Exceptions;
 using Notino_project.Core.Repositories;
-using System.Text.Json;
 using Xunit;
 
 namespace Notino_project.UnitTests.ApplicationTests
@@ -43,7 +42,7 @@ namespace Notino_project.UnitTests.ApplicationTests
                 new[]
                 {
                     DocumentValidationErrors.TagsCollectionShouldNotBeEmpty,
-                    DocumentValidationErrors.JsonElementMustBeObject
+                    DocumentValidationErrors.DataMustHaveAtLeastOneProperty
                 },
                 errors);
             readRepository.Verify(mock => mock.GetById(It.IsAny<Guid>()), Times.Never);
@@ -77,8 +76,9 @@ namespace Notino_project.UnitTests.ApplicationTests
         public async Task Update_RepositoryReportsMissingDocument_ReturnsNotFoundAndRemovesCachedDocument()
         {
             var id = Guid.NewGuid();
-            using var initialJson = JsonDocument.Parse("""{"name":"old"}""");
-            var existing = Document.Construct(["old"], initialJson.RootElement.Clone());
+            var existing = Document.Construct(
+                ["old"],
+                new Dictionary<string, string> { ["name"] = "old" });
             existing.Id = id;
             var readRepository = new Mock<IDocumentsReadRepository>();
             readRepository.Setup(mock => mock.GetById(id)).ReturnsAsync(existing);
@@ -107,8 +107,9 @@ namespace Notino_project.UnitTests.ApplicationTests
         public async Task Update_ValidRequest_ReturnsResponseAndCachesDocument()
         {
             var id = Guid.NewGuid();
-            using var initialJson = JsonDocument.Parse("""{"name":"old"}""");
-            var existing = Document.Construct(["old"], initialJson.RootElement.Clone());
+            var existing = Document.Construct(
+                ["old"],
+                new Dictionary<string, string> { ["name"] = "old" });
             existing.Id = id;
             var request = CreateValidRequest();
             var readRepository = new Mock<IDocumentsReadRepository>();
@@ -155,11 +156,10 @@ namespace Notino_project.UnitTests.ApplicationTests
 
         private static UpdateDocumentRequest CreateValidRequest()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"test"}""");
             return new UpdateDocumentRequest
             {
                 Tags = ["test"],
-                Data = jsonDocument.RootElement.Clone()
+                Data = new Dictionary<string, string> { ["name"] = "test" }
             };
         }
     }

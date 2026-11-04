@@ -1,6 +1,5 @@
 using Notino_project.Contract.Responses;
 using Notino_project.Core.Aggregates;
-using System.Text.Json;
 
 namespace Notino_project.Application.Mappers
 {
@@ -11,8 +10,10 @@ namespace Notino_project.Application.Mappers
             {
                 Id = document.Id,
                 Tags = document.Tags,
-                Data = JsonSerializer.Deserialize<Dictionary<string, string>>(document.Data.GetRawText())
-                    ?? throw new InvalidOperationException("Document data must be a JSON object."),
+                Data = document.Data.ToDictionary(
+                    property => property.Key,
+                    property => property.Value,
+                    StringComparer.Ordinal),
             };
     }
 }

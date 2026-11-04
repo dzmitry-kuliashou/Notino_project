@@ -7,7 +7,6 @@ using Notino_project.Application.Validators;
 using Notino_project.Contract.Examples;
 using Notino_project.Infrastructure;
 using Notino_project.Infrastructure.Repositories;
-using Notino_project.ModelBinders;
 using FluentValidation;
 using Swashbuckle.AspNetCore.Filters;
 using MongoDocument = Notino_project.Infrastructure.StorageModels.Document;
@@ -20,8 +19,6 @@ builder.Services.AddControllers(options =>
 {
     options.RespectBrowserAcceptHeader = true;
     //options.ReturnHttpNotAcceptable = true;
-
-    options.ModelBinderProviders.Add(new DynamicDataModelBinderProvider());
 
     // Add the MessagePack formatter
     var messagePackSerializerOptions = new MessagePackSerializerOptions(ContractlessStandardResolver.Instance);

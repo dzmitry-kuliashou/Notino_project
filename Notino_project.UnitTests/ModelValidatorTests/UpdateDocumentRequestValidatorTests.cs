@@ -2,7 +2,6 @@ using FluentValidation.Results;
 using Notino_project.Application.Errors;
 using Notino_project.Application.Validators;
 using Notino_project.Contract.Requests;
-using System.Text.Json;
 using Xunit;
 
 namespace Notino_project.UnitTests.ModelValidatorTests
@@ -38,39 +37,36 @@ namespace Notino_project.UnitTests.ModelValidatorTests
         [Fact]
         public void Validate_InvalidData_ReturnsValidationErrors()
         {
-            var nonObjectResult = ValidateData("42");
+            var nullDataResult = ValidateData(null);
             Assert.Equal(
-                DocumentValidationErrors.JsonElementMustBeObject,
-                Assert.Single(nonObjectResult.Errors).ErrorMessage);
+                DocumentValidationErrors.DataMustNotBeNull,
+                Assert.Single(nullDataResult.Errors).ErrorMessage);
 
-            var emptyObjectResult = ValidateData("{}");
+            var emptyDataResult = ValidateData(new Dictionary<string, string>());
             Assert.Equal(
-                DocumentValidationErrors.JsonElementMustHaveAtLeastOneProperty,
-                Assert.Single(emptyObjectResult.Errors).ErrorMessage);
+                DocumentValidationErrors.DataMustHaveAtLeastOneProperty,
+                Assert.Single(emptyDataResult.Errors).ErrorMessage);
 
-            var nonStringValueResult = ValidateData("""{"optional":42}""");
+            var nullValueResult = ValidateData(new Dictionary<string, string> { ["optional"] = null! });
             Assert.Equal(
-                string.Format(DocumentValidationErrors.JsonPropertyMustBeStringFormat, "optional"),
-                Assert.Single(nonStringValueResult.Errors).ErrorMessage);
+                string.Format(DocumentValidationErrors.DataPropertyMustBeStringFormat, "optional"),
+                Assert.Single(nullValueResult.Errors).ErrorMessage);
         }
 
-        private ValidationResult ValidateData(string json)
+        private ValidationResult ValidateData(Dictionary<string, string>? data)
         {
-            using var data = JsonDocument.Parse(json);
             var request = CreateValidRequest();
-            request.Data = data.RootElement.Clone();
+            request.Data = data!;
 
             return _validator.Validate(request);
         }
 
         private static UpdateDocumentRequest CreateValidRequest()
         {
-            using var data = JsonDocument.Parse("""{"something":"This is data"}""");
-
             return new UpdateDocumentRequest
             {
                 Tags = ["a"],
-                Data = data.RootElement.Clone(),
+                Data = new Dictionary<string, string> { ["something"] = "This is data" },
             };
         }
     }

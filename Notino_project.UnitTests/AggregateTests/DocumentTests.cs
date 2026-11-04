@@ -1,5 +1,4 @@
 using Notino_project.Core.Aggregates;
-using System.Text.Json;
 using Xunit;
 
 namespace Notino_project.UnitTests.AggregateTests
@@ -8,11 +7,8 @@ namespace Notino_project.UnitTests.AggregateTests
     {
         private static IEnumerable<string> ValidTags() => ["tag"];
 
-        private static JsonElement ValidData()
-        {
-            using var document = JsonDocument.Parse("""{"name":"value"}""");
-            return document.RootElement.Clone();
-        }
+        private static Dictionary<string, string> ValidData() =>
+            new() { ["name"] = "value" };
 
         [Fact]
         public void Construct_ValidInputs_CreatesDocumentWithGeneratedIdAndProperties()
@@ -24,7 +20,7 @@ namespace Notino_project.UnitTests.AggregateTests
 
             Assert.NotEqual(Guid.Empty, document.Id);
             Assert.Equal(tags, document.Tags);
-            Assert.Equal("value", document.Data.GetProperty("name").GetString());
+            Assert.Equal("value", document.Data["name"]);
             Assert.False(document.IsDeleted);
         }
 
@@ -49,12 +45,10 @@ namespace Notino_project.UnitTests.AggregateTests
         }
 
         [Fact]
-        public void Construct_NonObjectData_ThrowsArgumentException()
+        public void Construct_NullData_ThrowsArgumentNullException()
         {
-            using var jsonDocument = JsonDocument.Parse("""["value"]""");
-            var data = jsonDocument.RootElement.Clone();
-
-            var exception = Assert.Throws<ArgumentException>(() => Document.Construct(ValidTags(), data));
+            var exception = Assert.Throws<ArgumentNullException>(
+                () => Document.Construct(ValidTags(), null!));
 
             Assert.Equal("data", exception.ParamName);
         }
@@ -62,19 +56,16 @@ namespace Notino_project.UnitTests.AggregateTests
         [Fact]
         public void Construct_EmptyObjectData_ThrowsArgumentException()
         {
-            using var jsonDocument = JsonDocument.Parse("{}");
-            var data = jsonDocument.RootElement.Clone();
-
-            var exception = Assert.Throws<ArgumentException>(() => Document.Construct(ValidTags(), data));
+            var exception = Assert.Throws<ArgumentException>(
+                () => Document.Construct(ValidTags(), new Dictionary<string, string>()));
 
             Assert.Equal("data", exception.ParamName);
         }
 
         [Fact]
-        public void Construct_NonStringValues_ThrowsArgumentException()
+        public void Construct_NullValues_ThrowsArgumentException()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":1}""");
-            var data = jsonDocument.RootElement.Clone();
+            var data = new Dictionary<string, string> { ["name"] = null! };
 
             var exception = Assert.Throws<ArgumentException>(() => Document.Construct(ValidTags(), data));
 
@@ -88,14 +79,13 @@ namespace Notino_project.UnitTests.AggregateTests
             var id = document.Id;
             var updatedTags = new[] { "updated" };
 
-            using var jsonDocument = JsonDocument.Parse("""{"updated":"new-value"}""");
-            var updatedData = jsonDocument.RootElement.Clone();
+            var updatedData = new Dictionary<string, string> { ["updated"] = "new-value" };
 
             document.Update(updatedTags, updatedData);
 
             Assert.Equal(id, document.Id);
             Assert.Equal(updatedTags, document.Tags);
-            Assert.Equal("new-value", document.Data.GetProperty("updated").GetString());
+            Assert.Equal("new-value", document.Data["updated"]);
         }
 
         [Fact]
@@ -109,7 +99,7 @@ namespace Notino_project.UnitTests.AggregateTests
             Assert.Equal("tags", exception.ParamName);
             Assert.Equal(id, document.Id);
             Assert.Equal(ValidTags(), document.Tags);
-            Assert.Equal("value", document.Data.GetProperty("name").GetString());
+            Assert.Equal("value", document.Data["name"]);
         }
 
         [Fact]
@@ -118,15 +108,44 @@ namespace Notino_project.UnitTests.AggregateTests
             var document = Document.Construct(ValidTags(), ValidData());
             var id = document.Id;
 
-            using var jsonDocument = JsonDocument.Parse("""{"name":1}""");
-            var invalidData = jsonDocument.RootElement.Clone();
+            var invalidData = new Dictionary<string, string> { ["name"] = null! };
 
             var exception = Assert.Throws<ArgumentException>(() => document.Update(["updated"], invalidData));
 
             Assert.Equal("data", exception.ParamName);
             Assert.Equal(id, document.Id);
             Assert.Equal(ValidTags(), document.Tags);
-            Assert.Equal("value", document.Data.GetProperty("name").GetString());
+            Assert.Equal("value", document.Data["name"]);
+        }
+
+        [Fact]
+        public void Construct_DataIsCopiedToPreserveAggregateInvariants()
+        {
+            var data = ValidData();
+            var document = Document.Construct(ValidTags(), data);
+            data["name"] = "changed";
+
+            Assert.Equal("value", document.Data["name"]);
+        }
+
+        [Fact]
+        public void Data_CannotBeMutatedThroughExposedCollection()
+        {
+            var document = Document.Construct(ValidTags(), ValidData());
+            var data = Assert.IsAssignableFrom<IDictionary<string, string>>(document.Data);
+
+            Assert.Throws<NotSupportedException>(() => data["name"] = "changed");
+            Assert.Equal("value", document.Data["name"]);
+        }
+
+        [Fact]
+        public void Tags_CannotBeMutatedThroughExposedCollection()
+        {
+            var document = Document.Construct(ValidTags(), ValidData());
+            var tags = Assert.IsAssignableFrom<IList<string>>(document.Tags);
+
+            Assert.Throws<NotSupportedException>(() => tags[0] = "changed");
+            Assert.Equal("tag", document.Tags.Single());
         }
     }
 }

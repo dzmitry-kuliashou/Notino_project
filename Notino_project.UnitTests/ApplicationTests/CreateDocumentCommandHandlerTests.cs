@@ -10,7 +10,6 @@ using Notino_project.Contract.Responses;
 using Notino_project.Core.Aggregates;
 using Notino_project.Core.Exceptions;
 using Notino_project.Core.Repositories;
-using System.Text.Json;
 using Xunit;
 
 namespace Notino_project.UnitTests.ApplicationTests
@@ -39,7 +38,7 @@ namespace Notino_project.UnitTests.ApplicationTests
                 new[]
                 {
                     DocumentValidationErrors.TagsCollectionShouldNotBeEmpty,
-                    DocumentValidationErrors.JsonElementMustBeObject
+                    DocumentValidationErrors.DataMustHaveAtLeastOneProperty
                 },
                 errors);
             repository.Verify(mock => mock.Create(It.IsAny<Document>()), Times.Never);
@@ -105,11 +104,10 @@ namespace Notino_project.UnitTests.ApplicationTests
 
         private static CreateDocumentRequest CreateValidRequest()
         {
-            using var jsonDocument = JsonDocument.Parse("""{"name":"test"}""");
             return new CreateDocumentRequest
             {
                 Tags = ["test"],
-                Data = jsonDocument.RootElement.Clone()
+                Data = new Dictionary<string, string> { ["name"] = "test" }
             };
         }
     }

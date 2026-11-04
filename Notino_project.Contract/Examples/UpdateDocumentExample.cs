@@ -1,4 +1,3 @@
-using System.Text.Json;
 using Notino_project.Contract.Requests;
 using Swashbuckle.AspNetCore.Filters;
 
@@ -10,6 +9,6 @@ public class UpdateDocumentExample : IExamplesProvider<UpdateDocumentRequest>
         new()
         {
             Tags = ["example"],
-            Data = JsonSerializer.SerializeToElement(new { name = "updated example" })
+            Data = new Dictionary<string, string> { ["name"] = "updated example" }
         };
 }

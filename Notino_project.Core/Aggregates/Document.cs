@@ -1,69 +1,59 @@
 using Ardalis.GuardClauses;
-using System.Text.Json;
+using System.Collections.ObjectModel;
 
 namespace Notino_project.Core.Aggregates
 {
     public sealed class Document : AggregateRoot
     {
-        private Document(IEnumerable<string> tags, JsonElement data)
+        private Document(List<string> tags, Dictionary<string, string> data)
         {
-            Tags = tags;
-            Data = data;
+            _tags = tags;
+            _data = data;
         }
 
-        public IEnumerable<string> Tags { get; private set; }
+        private List<string> _tags;
+        private Dictionary<string, string> _data;
 
-        public JsonElement Data { get; private set; }
+        public IReadOnlyList<string> Tags => Array.AsReadOnly([.. _tags]);
 
-        public static Document Construct(IEnumerable<string> tags, JsonElement data)
+        public IReadOnlyDictionary<string, string> Data =>
+            new ReadOnlyDictionary<string, string>(
+                new Dictionary<string, string>(_data, StringComparer.Ordinal));
+
+        public static Document Construct(IEnumerable<string> tags, Dictionary<string, string> data)
         {
-            var validatedTags = Validate(tags, data);
-            return new Document(validatedTags, data);
+            var (validatedTags, validatedData) = Validate(tags, data);
+            return new Document(validatedTags, validatedData);
         }
 
-        public void Update(IEnumerable<string> tags, JsonElement data)
+        public void Update(IEnumerable<string> tags, Dictionary<string, string> data)
         {
-            var validatedTags = Validate(tags, data);
-            Tags = validatedTags;
-            Data = data;
+            var (validatedTags, validatedData) = Validate(tags, data);
+            _tags = validatedTags;
+            _data = validatedData;
         }
 
-        private static string[] Validate(IEnumerable<string> tags, JsonElement data)
+        private static (List<string> Tags, Dictionary<string, string> Data) Validate(
+            IEnumerable<string> tags,
+            Dictionary<string, string> data)
         {
-            var tagSnapshot = Guard.Against.Null(tags).ToArray();
+            var tagSnapshot = Guard.Against.Null(tags).ToList();
             Guard.Against.InvalidInput(
                 tagSnapshot,
                 nameof(tags),
-                values => values.Length > 0,
+                values => values.Count > 0,
                 "Tags collection shouldn't be empty");
+            var dataSnapshot = new Dictionary<string, string>(Guard.Against.Null(data), StringComparer.Ordinal);
             Guard.Against.InvalidInput(
-                data,
+                dataSnapshot,
                 nameof(data),
-                IsSimplePropertiesOnly,
-                "Data must be a non-empty JSON object with string values");
+                IsValidData,
+                "Data must be a non-empty dictionary with string values");
 
-            return tagSnapshot;
+            return (tagSnapshot, dataSnapshot);
         }
 
-        private static bool IsSimplePropertiesOnly(JsonElement data)
-        {
-            if (data.ValueKind != JsonValueKind.Object)
-            {
-                return false;
-            }
-
-            var hasAnyProperty = false;
-            foreach (var property in data.EnumerateObject())
-            {
-                if (property.Value.ValueKind != JsonValueKind.String)
-                {
-                    return false;
-                }
-
-                hasAnyProperty = true;
-            }
-
-            return hasAnyProperty;
-        }
+        private static bool IsValidData(Dictionary<string, string> data) =>
+            data.Count > 0 && data.Values.All(value => value is not null);
     }
 }
