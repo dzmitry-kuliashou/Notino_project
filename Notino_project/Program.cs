@@ -4,11 +4,12 @@ using MessagePack.Resolvers;
 using Microsoft.OpenApi.Models;
 using Notino_project.Application.Queries;
 using Notino_project.Application.Validators;
+using Notino_project.Contract.Examples;
 using Notino_project.Infrastructure;
 using Notino_project.Infrastructure.Repositories;
 using Notino_project.ModelBinders;
-using Notino_project.SwaggerFilters;
 using FluentValidation;
+using Swashbuckle.AspNetCore.Filters;
 using MongoDocument = Notino_project.Infrastructure.StorageModels.Document;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -35,10 +36,11 @@ builder.Services.AddControllers(options =>
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerExamplesFromAssemblyOf<CreateDocumentExample>();
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo { Title = "Demo API", Version = "v1" });
-    options.OperationFilter<AddAcceptHeaderOperationFilter>();
+    options.ExampleFilters();
 });
 
 builder.Services.AddMemoryCache();

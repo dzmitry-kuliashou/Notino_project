@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Swashbuckle.AspNetCore.Filters.Abstractions" Version="8.0.2" />
   </ItemGroup>
 
 </Project>
