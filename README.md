@@ -2,11 +2,11 @@
 
 Test task for Notino.
 
-The solution is a .NET 8 document API. The API controller dispatches document operations to Application handlers through MediatR; handlers validate requests, work with the document aggregate and repository, manage caching, map responses, and return the API results.
+The solution is a .NET 8 document API. The controller exposes `GET /documents`, `GET /documents/{id}`, `POST /documents`, `PUT /documents/{id}`, and `DELETE /documents/{id}` and dispatches operations to Application handlers through MediatR. Handlers validate requests, work with the document aggregate and repository, manage caching, map responses, and return API results.
 
 ## Projects
 
-- **Notino_project** — ASP.NET Core API. `DocumentController` exposes the paginated `GET /documents` collection route, `GET /documents/{id}`, `POST /documents`, and `PUT /documents/{id}` and forwards requests through `ISender`. `Program.cs` registers the Application handlers and validators, memory cache, and MongoDB-backed read and write repositories. Responses support JSON, XML, and MessagePack; JSON is used when the requested `Accept` format is unsupported.
+- **Notino_project** — ASP.NET Core API. `DocumentController` exposes the paginated `GET /documents` collection route, `GET /documents/{id}`, `POST /documents`, `PUT /documents/{id}`, and `DELETE /documents/{id}` and forwards requests through `ISender`. `Program.cs` registers the Application handlers and validators, memory cache, and MongoDB-backed read and write repositories. Responses support JSON, XML, and MessagePack; JSON is used when the requested `Accept` format is unsupported.
 - **Notino_project.Application** — MediatR query and command handlers, FluentValidation request validators, response mapper, validation messages, and shared cache key and expiration policy.
 - **Notino_project.Contract** — API request and response models. `DocumentResponse.Data` is a string dictionary, while request data uses `JsonElement`.
 - **Notino_project.Core** — `Document` aggregate, shared `AggregateRoot`, and the `IDocumentsReadRepository` / `IDocumentsWriteRepository` contracts. The aggregate enforces its tag and JSON-data invariants.
@@ -24,10 +24,10 @@ The validators and response mapper live in Application. Validation messages are 
 
 `GET /documents` returns a `DocumentsResponse` containing `items`, `totalPageCount`, `currentPage`, `pageSize`, `hasPrevious`, and `hasNext`.
 
-Use the optional query parameters `p` (zero-based page index, default `0`) and `ps` (page size, default `10`), for example:
+Use the optional query parameters `p` (zero-based page index, default `0`) and `ps` (page size, default `10`). With the Compose API running, for example:
 
 ```powershell
-Invoke-RestMethod -Uri "http://localhost:8080/documents?p=0&ps=10"
+Invoke-RestMethod -Uri "http://localhost:7000/documents?p=0&ps=10"
 ```
 
 Malformed or negative `p` values use page `0`; malformed or non-positive `ps` values use page size `10`. If the page offset would overflow, the page index is clamped to the largest safe index for the selected page size. Results are ordered by document ID ascending. The repository uses an exact document count to calculate `totalPageCount`; the response does not expose a total item count. A valid page beyond the last page returns HTTP 200 with an empty `items` array and the requested page metadata.
@@ -44,14 +44,14 @@ dotnet test Notino_project.sln
 
 MongoDB configuration is read from the `MongoDb` section. `appsettings.json` provides non-secret local defaults (`mongodb://localhost:27017`, database `notino`, collection `documents`); normal .NET configuration environment variables such as `MongoDb__ConnectionString` override them.
 
-Start the API and MongoDB with Compose:
+Start the API and MongoDB with Compose. The API service is in the `notino_project` profile, so enable that profile explicitly:
 
 ```powershell
-docker compose up --build -d
+docker compose --profile notino_project up --build -d
 docker compose ps
 ```
 
-Compose waits for MongoDB's ping healthcheck before starting the API, persists database files in the `mongodb-data` named volume, publishes MongoDB on port `27017`, and serves the API on `http://localhost:8080`. The API's connection string defaults to `mongodb://mongo:27017` inside the Compose network. Override Compose settings with `MONGODB_API_CONNECTION_STRING`, `MONGODB_DATABASE_NAME`, and `MONGODB_COLLECTION_NAME`.
+Compose waits for MongoDB's ping healthcheck before starting the API, persists database files in the `mongodb-data` named volume, publishes MongoDB on port `27017`, and serves the API at `http://localhost:7000` (host port `7000` mapped to container port `80`). The API's connection string defaults to `mongodb://mongo:27017` inside the Compose network. Override Compose settings with `MONGODB_API_CONNECTION_STRING`, `MONGODB_DATABASE_NAME`, and `MONGODB_COLLECTION_NAME`.
 
 The repository tests use Testcontainers to start an isolated `mongo:8.0.4` container and dispose it after the test class finishes. Docker must be available to the test process; no external MongoDB service or connection-string environment variable is needed. Run only these tests with:
 
@@ -62,12 +62,12 @@ dotnet test .\Notino_project.IntegrationTests\Notino_project.IntegrationTests.cs
 To smoke-test the API and persistence, create a document, then read and update it:
 
 ```powershell
-$created = Invoke-RestMethod -Uri "http://localhost:8080/documents" -Method Post -ContentType "application/json" -Body '{"tags":["smoke"],"data":{"name":"before"}}'
+$created = Invoke-RestMethod -Uri "http://localhost:7000/documents" -Method Post -ContentType "application/json" -Body '{"tags":["smoke"],"data":{"name":"before"}}'
 $id = $created.id
-Invoke-RestMethod -Uri "http://localhost:8080/documents/$id"
-Invoke-RestMethod -Uri "http://localhost:8080/documents/$id" -Method Put -ContentType "application/json" -Body '{"tags":["smoke","updated"],"data":{"name":"after"}}'
+Invoke-RestMethod -Uri "http://localhost:7000/documents/$id"
+Invoke-RestMethod -Uri "http://localhost:7000/documents/$id" -Method Put -ContentType "application/json" -Body '{"tags":["smoke","updated"],"data":{"name":"after"}}'
 ```
 
-Restart only the API with `docker compose restart api`, wait for it to listen again, and repeat the GET. The updated document should still be available because MongoDB retains the data independently of the API container.
+Restart only the API with `docker compose restart notino_project`, wait for it to listen again, and repeat the GET. The updated document should still be available because MongoDB retains the data independently of the API container.
 
-The fake in-memory storage project was removed after the solution build, full test suite with MongoDB available, real-Mongo repository tests, and Compose create/read/update/restart smoke check passed. `docker compose down` preserves the named data volume; removing it deletes the local MongoDB data.
+`docker compose down` preserves the named data volume; `docker compose down --volumes` removes it and deletes the local MongoDB data.
