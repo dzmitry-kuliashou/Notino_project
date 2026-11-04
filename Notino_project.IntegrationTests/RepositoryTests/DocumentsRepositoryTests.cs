@@ -1,5 +1,5 @@
-using MongoDB.Driver;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using MongoDB.Driver;
 using Notino_project.Core.Aggregates;
 using Notino_project.Core.Exceptions;
 using Notino_project.Infrastructure.Repositories;
@@ -7,7 +7,7 @@ using Testcontainers.MongoDb;
 using Xunit;
 using MongoDocument = Notino_project.Infrastructure.StorageModels.Document;
 
-namespace Notino_project.IntegrationTests
+namespace Notino_project.IntegrationTests.RepositoryTests
 {
     public sealed class MongoDatabaseFixture : IAsyncLifetime
     {

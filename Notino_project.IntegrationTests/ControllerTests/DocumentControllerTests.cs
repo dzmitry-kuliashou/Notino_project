@@ -1,12 +1,12 @@
+using System.Net;
+using System.Net.Http.Json;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Notino_project.Application.Errors;
 using Notino_project.Contract.Responses;
 using Notino_project.IntegrationTests.ControllerFormattersTests;
-using System.Net;
-using System.Net.Http.Json;
 using Xunit;
 
-namespace Notino_project.IntegrationTests;
+namespace Notino_project.IntegrationTests.ControllerTests;
 
 public sealed class DocumentControllerTests(CustomWebApplicationFactory factory)
     : IClassFixture<CustomWebApplicationFactory>
